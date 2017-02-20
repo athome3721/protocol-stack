@@ -1,0 +1,16 @@
+#libevent pkg-config source file
+
+prefix=/home/zhangyg/ntp-stable/install
+exec_prefix=/home/zhangyg/ntp-stable/install
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: libevent_pthreads
+Description: libevent_pthreads adds pthreads-based threading support to libevent
+Version: 2.1.5-beta
+Requires: libevent
+Conflicts:
+Libs: -L${libdir} -levent_pthreads
+Libs.private: -lrt  
+Cflags: -I${includedir} -pthread
+

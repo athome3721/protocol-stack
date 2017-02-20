@@ -1,0 +1,16 @@
+#libevent pkg-config source file
+
+prefix=/home/zhangyg/ntp-stable/install
+exec_prefix=/home/zhangyg/ntp-stable/install
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: libevent_openssl
+Description: libevent_openssl adds openssl-based TLS support to libevent
+Version: 2.1.5-beta
+Requires: libevent
+Conflicts:
+Libs: -L${libdir} -levent_openssl
+Libs.private: -lrt  
+Cflags: -I${includedir} 
+
