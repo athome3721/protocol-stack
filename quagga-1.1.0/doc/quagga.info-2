@@ -1,0 +1,1632 @@
+This is quagga.info, produced by makeinfo version 4.13 from quagga.texi.
+
+Copyright (C) 1999-2005 Kunihiro Ishiguro, et al.
+
+     Permission is granted to make and distribute verbatim copies of
+     this manual provided the copyright notice and this permission
+     notice are preserved on all copies.
+
+     Permission is granted to copy and distribute modified versions of
+     this manual under the conditions for verbatim copying, provided
+     that the entire resulting derived work is distributed under the
+     terms of a permission notice identical to this one.
+
+     Permission is granted to copy and distribute translations of this
+     manual into another language, under the above conditions for
+     modified versions, except that this permission notice may be
+     stated in a translation approved by Kunihiro Ishiguro.
+
+INFO-DIR-SECTION Routing Software:
+START-INFO-DIR-ENTRY
+* Quagga: (quagga).		The Quagga Software Routing Suite
+END-INFO-DIR-ENTRY
+
+   This file documents the Quagga Software Routing Suite which manages
+common TCP/IP routing protocols.
+
+   This is Edition 1.1.0, last updated 18 October 2016 of `The Quagga
+Manual', for Quagga Version 1.1.0.
+
+   Copyright (C) 1999-2005 Kunihiro Ishiguro, et al.
+
+     Permission is granted to make and distribute verbatim copies of
+     this manual provided the copyright notice and this permission
+     notice are preserved on all copies.
+
+     Permission is granted to copy and distribute modified versions of
+     this manual under the conditions for verbatim copying, provided
+     that the entire resulting derived work is distributed under the
+     terms of a permission notice identical to this one.
+
+     Permission is granted to copy and distribute translations of this
+     manual into another language, under the above conditions for
+     modified versions, except that this permission notice may be
+     stated in a translation approved by Kunihiro Ishiguro.
+
+
+File: quagga.info,  Node: Zebra Protocol,  Next: Packet Binary Dump Format,  Prev: SNMP Support,  Up: Top
+
+Appendix A Zebra Protocol
+*************************
+
+A.1 Overview of the Zebra Protocol
+==================================
+
+Zebra Protocol is used by protocol daemons to communicate with the
+zebra daemon.
+
+   Each protocol daemon may request and send information to and from the
+zebra daemon such as interface states, routing state,
+nexthop-validation, and so on. Protocol daemons may also install routes
+with zebra. The zebra daemon manages which route is installed into the
+forwarding table with the kernel.
+
+   Zebra Protocol is a streaming protocol, with a common header. Two
+versions of the header are in use. Version 0 is implicitely versioned.
+Version 1 has an explicit version field. Version 0 can be distinguished
+from all other versions by examining the 3rd byte of the header, which
+contains a marker value for all versions bar version 0. The marker byte
+corresponds to the command field in version 0, and the marker value is
+a reserved command in version 0.
+
+   We do not anticipate there will be further versions of the header for
+the foreseeable future, as the command field in version 1 is wide
+enough to allow for future extensions to done compatibly through
+seperate commands.
+
+   Version 0 is used by all versions of GNU Zebra as of this writing,
+and versions of Quagga up to and including Quagga 0.98. Version 1 will
+be used as of Quagga 1.0.
+
+A.2 Zebra Protocol Definition
+=============================
+
+A.2.1 Zebra Protocol Header (version 0)
+---------------------------------------
+
+0                   1                   2                   3
+0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-------------------------------+---------------+
+|           Length (2)          |   Command (1) |
++-------------------------------+---------------+
+
+A.2.2 Zebra Protocol Common Header (version 1)
+----------------------------------------------
+
+0                   1                   2                   3
+0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-------------------------------+---------------+-------------+
+|           Length (2)          |   Marker (1)  | Version (1) |
++-------------------------------+---------------+-------------+
+|          Command (2)          |
++-------------------------------+
+
+A.2.3 Zebra Protocol Header Field Definitions
+---------------------------------------------
+
+`Length'
+     Total packet length including this header. The minimum length is 3
+     bytes for version 0 messages and 6 bytes for version 1 messages.
+
+`Marker'
+     Static marker with a value of 255 always. This is to allow version
+     0 Zserv headers (which do not include version explicitely) to be
+     distinguished from versioned headers. Not present in version 0
+     messages.
+
+`Version'
+     Version number of the Zserv message. Clients should not continue
+     processing messages past the version field for versions they do not
+     recognise. Not present in version 0 messages.
+
+`Command'
+     The Zebra Protocol command.
+
+A.2.4 Zebra Protocol Commands
+-----------------------------
+
+Command                                      Value
+----------------------------------------------------- 
+ZEBRA_INTERFACE_ADD                          1
+ZEBRA_INTERFACE_DELETE                       2
+ZEBRA_INTERFACE_ADDRESS_ADD                  3
+ZEBRA_INTERFACE_ADDRESS_DELETE               4
+ZEBRA_INTERFACE_UP                           5
+ZEBRA_INTERFACE_DOWN                         6
+ZEBRA_IPV4_ROUTE_ADD                         7
+ZEBRA_IPV4_ROUTE_DELETE                      8
+ZEBRA_IPV6_ROUTE_ADD                         9
+ZEBRA_IPV6_ROUTE_DELETE                      10
+ZEBRA_REDISTRIBUTE_ADD                       11
+ZEBRA_REDISTRIBUTE_DELETE                    12
+ZEBRA_REDISTRIBUTE_DEFAULT_ADD               13
+ZEBRA_REDISTRIBUTE_DEFAULT_DELETE            14
+ZEBRA_IPV4_NEXTHOP_LOOKUP                    15
+ZEBRA_IPV6_NEXTHOP_LOOKUP                    16
+
+
+File: quagga.info,  Node: Packet Binary Dump Format,  Next: Command Index,  Prev: Zebra Protocol,  Up: Top
+
+Appendix B Packet Binary Dump Format
+************************************
+
+Quagga can dump routing protocol packet into file with a binary format
+(*note Dump BGP packets and table::).
+
+   It seems to be better that we share the MRT's header format for
+backward compatibility with MRT's dump logs. We should also define the
+binary format excluding the header, because we must support both IP v4
+and v6 addresses as socket addresses and / or routing entries.
+
+   In the last meeting, we discussed to have a version field in the
+header. But Masaki told us that we can define new `type' value rather
+than having a `version' field, and it seems to be better because we
+don't need to change header format.
+
+   Here is the common header format. This is same as that of MRT.
+
+0                   1                   2                   3
+0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                              Time                             |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|             Type              |            Subtype            |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                             Length                            |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+   If `type' is PROTOCOL_BGP4MP_ET, the common header format will
+contain an additional microsecond field (RFC6396 2011).
+
+0                   1                   2                   3
+0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                              Time                             |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|             Type              |            Subtype            |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                             Length                            |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                          Microsecond                          |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+   If `type' is PROTOCOL_BGP4MP, `subtype' is BGP4MP_STATE_CHANGE, and
+Address Family == IP (version 4)
+
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|        Source AS number       |     Destination AS number     |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|        Interface Index        |      Address Family           |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                        Source IP address                      |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                     Destination IP address                    |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|            Old State          |           New State           |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+   Where State is the value defined in RFC1771.
+
+   If `type' is PROTOCOL_BGP4MP, `subtype' is BGP4MP_STATE_CHANGE, and
+Address Family == IP version 6
+
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|        Source AS number       |     Destination AS number     |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|        Interface Index        |      Address Family           |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                        Source IP address                      |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                        Source IP address (Cont'd)             |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                        Source IP address (Cont'd)             |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                        Source IP address (Cont'd)             |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                     Destination IP address                    |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                     Destination IP address (Cont'd)           |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                     Destination IP address (Cont'd)           |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                     Destination IP address (Cont'd)           |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|            Old State          |           New State           |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+   If `type' is PROTOCOL_BGP4MP, `subtype' is BGP4MP_MESSAGE, and
+Address Family == IP (version 4)
+
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|        Source AS number       |     Destination AS number     |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|        Interface Index        |      Address Family           |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                        Source IP address                      |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                     Destination IP address                    |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                       BGP Message Packet                      |
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+   Where BGP Message Packet is the whole contents of the BGP4 message
+including header portion.
+
+   If `type' is PROTOCOL_BGP4MP, `subtype' is BGP4MP_MESSAGE, and
+Address Family == IP version 6
+
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|        Source AS number       |     Destination AS number     |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|        Interface Index        |      Address Family           |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                        Source IP address                      |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                        Source IP address (Cont'd)             |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                        Source IP address (Cont'd)             |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                        Source IP address (Cont'd)             |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                     Destination IP address                    |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                     Destination IP address (Cont'd)           |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                     Destination IP address (Cont'd)           |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                     Destination IP address (Cont'd)           |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                       BGP Message Packet                      |
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+   If `type' is PROTOCOL_BGP4MP, `subtype' is BGP4MP_ENTRY, and Address
+Family == IP (version 4)
+
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|            View #             |            Status             |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                        Time Last Change                       |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|       Address Family          |    SAFI       | Next-Hop-Len  |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                        Next Hop Address                       |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+| Prefix Length |             Address Prefix [variable]         |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|       Attribute Length        |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|      BGP Attribute [variable length]    			|
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+   If `type' is PROTOCOL_BGP4MP, `subtype' is BGP4MP_ENTRY, and Address
+Family == IP version 6
+
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|            View #             |            Status             |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                        Time Last Change                       |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|       Address Family          |    SAFI       | Next-Hop-Len  |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                        Next Hop Address                       |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                        Next Hop Address (Cont'd)              |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                        Next Hop Address (Cont'd)              |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                        Next Hop Address (Cont'd)              |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+| Prefix Length |             Address Prefix [variable]         |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|     Address Prefix (cont'd) [variable]        |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|       Attribute Length        |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|      BGP Attribute [variable length]    			    |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+   	BGP4 Attribute must not contain MP_UNREACH_NLRI.  	If BGP
+Attribute has MP_REACH_NLRI field, it must has 	zero length NLRI, e.g.,
+MP_REACH_NLRI has only Address 	Family, SAFI and next-hop values.
+
+   If `type' is PROTOCOL_BGP4MP and `subtype' is BGP4MP_SNAPSHOT,
+
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|           View #              |       File Name [variable]    |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+   The file specified in "File Name" contains all routing entries,
+which are in the format of "subtype == BGP4MP_ENTRY".
+
+Constants:
+  /* type value */
+  #define MSG_PROTOCOL_BGP4MP    16
+  #define MSG_PROTOCOL_BGP4MP_ET 17
+  /* subtype value */
+  #define BGP4MP_STATE_CHANGE 0
+  #define BGP4MP_MESSAGE 1
+  #define BGP4MP_ENTRY 2
+  #define BGP4MP_SNAPSHOT 3
+
+
+File: quagga.info,  Node: Command Index,  Next: VTY Key Index,  Prev: Packet Binary Dump Format,  Up: Top
+
+Command Index
+*************
+
+ [index ]
+* Menu:
+
+* access-class ACCESS-LIST:              Basic Config Commands.
+                                                              (line 148)
+* access-list NAME deny IPV4-NETWORK:    IP Access List.      (line   8)
+* access-list NAME permit IPV4-NETWORK:  IP Access List.      (line   7)
+* admin-grp BANDWIDTH:                   Link Parameters Commands.
+                                                              (line  26)
+* agentx:                                MIB and command reference.
+                                                              (line  35)
+* aggregate-address A.B.C.D/M:           Route Aggregation.   (line   7)
+* aggregate-address A.B.C.D/M as-set:    Route Aggregation.   (line  10)
+* aggregate-address A.B.C.D/M summary-only: Route Aggregation.
+                                                              (line  14)
+* area <0-4294967295> authentication:    OSPF area.           (line 127)
+* area <0-4294967295> authentication message-digest: OSPF area.
+                                                              (line 134)
+* area <0-4294967295> export-list NAME:  OSPF area.           (line  85)
+* area <0-4294967295> filter-list prefix NAME in: OSPF area.  (line 117)
+* area <0-4294967295> filter-list prefix NAME out: OSPF area. (line 118)
+* area <0-4294967295> import-list NAME:  OSPF area.           (line 109)
+* area <0-4294967295> range A.B.C.D/M:   OSPF area.           (line   8)
+* area <0-4294967295> shortcut:          OSPF area.           (line  55)
+* area <0-4294967295> stub:              OSPF area.           (line  62)
+* area <0-4294967295> stub no-summary:   OSPF area.           (line  74)
+* area <0-4294967295> virtual-link A.B.C.D: OSPF area.        (line  50)
+* area A.B.C.D authentication:           OSPF area.           (line 126)
+* area A.B.C.D authentication message-digest: OSPF area.      (line 133)
+* area A.B.C.D default-cost <0-16777215>: OSPF area.          (line  80)
+* area A.B.C.D export-list NAME:         OSPF area.           (line  84)
+* area A.B.C.D filter-list prefix NAME in: OSPF area.         (line 115)
+* area A.B.C.D filter-list prefix NAME out: OSPF area.        (line 116)
+* area A.B.C.D import-list NAME:         OSPF area.           (line 108)
+* area A.B.C.D range A.B.C.D/M:          OSPF area.           (line   7)
+* area A.B.C.D range IPV4_PREFIX not-advertise: OSPF area.    (line  28)
+* area A.B.C.D range IPV4_PREFIX substitute IPV4_PREFIX: OSPF area.
+                                                              (line  34)
+* area A.B.C.D shortcut:                 OSPF area.           (line  54)
+* area A.B.C.D stub:                     OSPF area.           (line  61)
+* area A.B.C.D stub no-summary:          OSPF area.           (line  73)
+* area A.B.C.D virtual-link A.B.C.D:     OSPF area.           (line  49)
+* area-password [clear | md5] <password>: ISIS router.        (line  26)
+* auto-cost reference-bandwidth <1-4294967>: OSPF router.     (line 163)
+* auto-cost reference-bandwidth COST:    OSPF6 router.        (line  51)
+* ava-bw BANDWIDTH:                      Link Parameters Commands.
+                                                              (line  42)
+* bandwidth <1-10000000>:                Standard Commands.   (line  31)
+* banner motd default:                   Basic Config Commands.
+                                                              (line 130)
+* bgp always-compare-med:                BGP MED.             (line 230)
+* bgp bestpath as-path confed:           BGP decision process.
+                                                              (line  66)
+* bgp bestpath as-path multipath-relax:  BGP decision process.
+                                                              (line  71)
+* bgp bestpath compare-routerid:         BGP decision process.
+                                                              (line  77)
+* bgp cluster-id A.B.C.D:                Route Reflector.     (line   7)
+* bgp config-type cisco:                 Multiple instance.   (line  20)
+* bgp config-type zebra:                 Multiple instance.   (line  53)
+* bgp dampening <1-45> <1-20000> <1-20000> <1-255>: BGP route flap dampening.
+                                                              (line   7)
+* bgp deterministic-med:                 BGP MED.             (line 212)
+* bgp multiple-instance:                 Multiple instance.   (line  10)
+* bgp route-reflector allow-outbound-policy: Peer filtering.  (line  18)
+* bgp router-id A.B.C.D:                 BGP router.          (line  22)
+* call NAME:                             Route Map Call Command.
+                                                              (line   7)
+* call WORD:                             Commands for configuring a Route Server.
+                                                              (line  52)
+* capability opaque:                     Opaque LSA.          (line   8)
+* clear ip bgp PEER:                     More Show IP BGP.    (line  25)
+* clear ip bgp PEER soft in:             More Show IP BGP.    (line  28)
+* clear ip prefix-list:                  Clear counter of ip prefix-list.
+                                                              (line   7)
+* clear ip prefix-list NAME:             Clear counter of ip prefix-list.
+                                                              (line  11)
+* clear ip prefix-list NAME A.B.C.D/M:   Clear counter of ip prefix-list.
+                                                              (line  13)
+* clear zebra fpm stats:                 zebra Terminal Mode Commands.
+                                                              (line  41)
+* configure terminal:                    Terminal Mode Commands.
+                                                              (line  13)
+* continue:                              Route Map Exit Action Command.
+                                                              (line   8)
+* continue N:                            Route Map Exit Action Command.
+                                                              (line  12)
+* debug event:                           More Show IP BGP.    (line  39)
+* debug isis adj-packets:                Debugging ISIS.      (line   7)
+* debug isis checksum-errors:            Debugging ISIS.      (line  11)
+* debug isis events:                     Debugging ISIS.      (line  15)
+* debug isis local-updates:              Debugging ISIS.      (line  19)
+* debug isis packet-dump:                Debugging ISIS.      (line  23)
+* debug isis protocol-errors:            Debugging ISIS.      (line  27)
+* debug isis route-events:               Debugging ISIS.      (line  31)
+* debug isis snp-packets:                Debugging ISIS.      (line  35)
+* debug isis spf-events:                 Debugging ISIS.      (line  39)
+* debug isis spf-statistics:             Debugging ISIS.      (line  40)
+* debug isis spf-triggers:               Debugging ISIS.      (line  41)
+* debug isis update-packets:             Debugging ISIS.      (line  48)
+* debug keepalive:                       More Show IP BGP.    (line  43)
+* debug ospf event:                      Debugging OSPF.      (line  25)
+* debug ospf ism:                        Debugging OSPF.      (line  13)
+* debug ospf ism (status|events|timers): Debugging OSPF.      (line  14)
+* debug ospf lsa:                        Debugging OSPF.      (line  33)
+* debug ospf lsa (generate|flooding|refresh): Debugging OSPF. (line  34)
+* debug ospf nsm:                        Debugging OSPF.      (line  19)
+* debug ospf nsm (status|events|timers): Debugging OSPF.      (line  20)
+* debug ospf nssa:                       Debugging OSPF.      (line  29)
+* debug ospf packet (hello|dd|ls-request|ls-update|ls-ack|all) (send|recv) [detail]: Debugging OSPF.
+                                                              (line   8)
+* debug ospf te:                         Debugging OSPF.      (line  39)
+* debug ospf zebra:                      Debugging OSPF.      (line  43)
+* debug ospf zebra (interface|redistribute): Debugging OSPF.  (line  44)
+* debug rip events:                      RIP Debug Commands.  (line   9)
+* debug rip packet:                      RIP Debug Commands.  (line  15)
+* debug rip zebra:                       RIP Debug Commands.  (line  22)
+* debug ripng events:                    ripngd Terminal Mode Commands.
+                                                              (line  11)
+* debug ripng packet:                    ripngd Terminal Mode Commands.
+                                                              (line  13)
+* debug ripng zebra:                     ripngd Terminal Mode Commands.
+                                                              (line  15)
+* debug update:                          More Show IP BGP.    (line  41)
+* default-information originate <1>:     Redistribute routes to OSPF.
+                                                              (line  37)
+* default-information originate:         How to Announce RIP route.
+                                                              (line  51)
+* default-information originate always:  Redistribute routes to OSPF.
+                                                              (line  43)
+* default-information originate always metric <0-16777214>: Redistribute routes to OSPF.
+                                                              (line  45)
+* default-information originate always metric <0-16777214> metric-type (1|2): Redistribute routes to OSPF.
+                                                              (line  47)
+* default-information originate always metric <0-16777214> metric-type (1|2) route-map WORD: Redistribute routes to OSPF.
+                                                              (line  49)
+* default-information originate metric <0-16777214>: Redistribute routes to OSPF.
+                                                              (line  38)
+* default-information originate metric <0-16777214> metric-type (1|2): Redistribute routes to OSPF.
+                                                              (line  40)
+* default-information originate metric <0-16777214> metric-type (1|2) route-map WORD: Redistribute routes to OSPF.
+                                                              (line  42)
+* default-metric <0-16777214>:           Redistribute routes to OSPF.
+                                                              (line  65)
+* default-metric <1-16>:                 RIP Metric Manipulation.
+                                                              (line  11)
+* delay <0-16777215> [min <0-16777215> | max <0-16777215>]: Link Parameters Commands.
+                                                              (line  38)
+* delay-variation <0-16777215>:          Link Parameters Commands.
+                                                              (line  39)
+* description DESCRIPTION ...:           Standard Commands.   (line  24)
+* distance <1-255> <1>:                  Redistribute routes to OSPF.
+                                                              (line  68)
+* distance <1-255>:                      RIP distance.        (line   9)
+* distance <1-255> A.B.C.D/M <1>:        BGP distance.        (line  12)
+* distance <1-255> A.B.C.D/M:            RIP distance.        (line  13)
+* distance <1-255> A.B.C.D/M ACCESS-LIST: RIP distance.       (line  18)
+* distance <1-255> A.B.C.D/M WORD:       BGP distance.        (line  13)
+* distance bgp <1-255> <1-255> <1-255>:  BGP distance.        (line   7)
+* distance ospf (intra-area|inter-area|external) <1-255>: Redistribute routes to OSPF.
+                                                              (line  72)
+* distribute-list ACCESS_LIST (in|out) IFNAME: ripngd Filtering Commands.
+                                                              (line   7)
+* distribute-list ACCESS_LIST DIRECT IFNAME: Filtering RIP Routes.
+                                                              (line   9)
+* distribute-list NAME out (kernel|connected|static|rip|ospf: Redistribute routes to OSPF.
+                                                              (line  58)
+* distribute-list prefix PREFIX_LIST (in|out) IFNAME: Filtering RIP Routes.
+                                                              (line  32)
+* domain-password [clear | md5] <password>: ISIS router.      (line  27)
+* dump bgp all PATH [INTERVAL]:          Dump BGP packets and table.
+                                                              (line   7)
+* dump bgp all-et PATH [INTERVAL]:       Dump BGP packets and table.
+                                                              (line   8)
+* dump bgp routes-mrt PATH:              Dump BGP packets and table.
+                                                              (line  25)
+* dump bgp routes-mrt PATH INTERVAL:     Dump BGP packets and table.
+                                                              (line  26)
+* dump bgp updates PATH [INTERVAL]:      Dump BGP packets and table.
+                                                              (line  16)
+* dump bgp updates-et PATH [INTERVAL]:   Dump BGP packets and table.
+                                                              (line  17)
+* enable:                                Link Parameters Commands.
+                                                              (line  19)
+* enable password PASSWORD:              Basic Config Commands.
+                                                              (line  14)
+* exec-timeout MINUTE:                   Basic Config Commands.
+                                                              (line 136)
+* exec-timeout MINUTE SECOND:            Basic Config Commands.
+                                                              (line 137)
+* flush_timer TIME:                      ripngd Configuration.
+                                                              (line  12)
+* hostname dynamic:                      ISIS router.         (line  22)
+* hostname HOSTNAME:                     Basic Config Commands.
+                                                              (line   7)
+* interface IFNAME:                      Standard Commands.   (line   7)
+* interface IFNAME area AREA:            OSPF6 router.        (line  12)
+* ip address ADDRESS/PREFIX:             Standard Commands.   (line  13)
+* ip address ADDRESS/PREFIX secondary:   Standard Commands.   (line  19)
+* ip as-path access-list WORD {permit|deny} LINE: AS Path Access List.
+                                                              (line   9)
+* ip community-list <1-99> {permit|deny} COMMUNITY: Numbered BGP Community Lists.
+                                                              (line  14)
+* ip community-list <100-199> {permit|deny} COMMUNITY: Numbered BGP Community Lists.
+                                                              (line  20)
+* ip community-list expanded NAME {permit|deny} LINE: BGP Community Lists.
+                                                              (line  30)
+* ip community-list NAME {permit|deny} COMMUNITY: Numbered BGP Community Lists.
+                                                              (line  25)
+* ip community-list standard NAME {permit|deny} COMMUNITY: BGP Community Lists.
+                                                              (line  20)
+* ip extcommunity-list expanded NAME {permit|deny} LINE: BGP Extended Community Lists.
+                                                              (line  21)
+* ip extcommunity-list standard NAME {permit|deny} EXTCOMMUNITY: BGP Extended Community Lists.
+                                                              (line  10)
+* ip mroute PREFIX NEXTHOP [DISTANCE]:   Multicast RIB Commands.
+                                                              (line  72)
+* ip multicast rpf-lookup-mode MODE:     Multicast RIB Commands.
+                                                              (line  19)
+* ip ospf area AREA [ADDR]:              OSPF interface.      (line   7)
+* ip ospf authentication message-digest: OSPF interface.      (line  29)
+* ip ospf authentication-key AUTH_KEY:   OSPF interface.      (line  19)
+* ip ospf cost <1-65535>:                OSPF interface.      (line  57)
+* ip ospf dead-interval <1-65535>:       OSPF interface.      (line  62)
+* ip ospf dead-interval minimal hello-multiplier <2-20>: OSPF interface.
+                                                              (line  64)
+* ip ospf hello-interval <1-65535>:      OSPF interface.      (line  81)
+* ip ospf message-digest-key KEYID md5 KEY: OSPF interface.   (line  45)
+* ip ospf network (broadcast|non-broadcast|point-to-multipoint|point-to-point): OSPF interface.
+                                                              (line  92)
+* ip ospf priority <0-255>:              OSPF interface.      (line  96)
+* ip ospf retransmit-interval <1-65535>: OSPF interface.      (line 103)
+* ip ospf transmit-delay:                OSPF interface.      (line 109)
+* ip prefix-list NAME (permit|deny) PREFIX [le LEN] [ge LEN]: IP Prefix List.
+                                                              (line  16)
+* ip prefix-list NAME description DESC:  ip prefix-list description.
+                                                              (line   7)
+* ip prefix-list NAME seq NUMBER (permit|deny) PREFIX [le LEN] [ge LEN]: IP Prefix List.
+                                                              (line  18)
+* ip prefix-list sequence-number:        ip prefix-list sequential number control.
+                                                              (line   7)
+* ip protocol PROTOCOL route-map ROUTEMAP: zebra Route Filtering.
+                                                              (line  12)
+* ip rip authentication key-chain KEY-CHAIN: RIP Authentication.
+                                                              (line  43)
+* ip rip authentication mode md5:        RIP Authentication.  (line  29)
+* ip rip authentication mode text:       RIP Authentication.  (line  33)
+* ip rip authentication string STRING:   RIP Authentication.  (line  37)
+* ip rip receive version VERSION:        RIP Version Control. (line  44)
+* ip rip send version VERSION:           RIP Version Control. (line  33)
+* ip route NETWORK GATEWAY:              Static Route Commands.
+                                                              (line  10)
+* ip route NETWORK GATEWAY DISTANCE:     Static Route Commands.
+                                                              (line  36)
+* ip route NETWORK NETMASK GATEWAY:      Static Route Commands.
+                                                              (line  25)
+* ip router isis WORD:                   ISIS interface.      (line   7)
+* ip split-horizon:                      RIP Configuration.   (line  70)
+* ipv6 address ADDRESS/PREFIX:           Standard Commands.   (line  14)
+* ipv6 nd adv-interval-option:           Router Advertisement.
+                                                              (line 127)
+* ipv6 nd home-agent-config-flag:        Router Advertisement.
+                                                              (line 101)
+* ipv6 nd home-agent-lifetime <0-65520>: Router Advertisement.
+                                                              (line 118)
+* ipv6 nd home-agent-preference <0-65535>: Router Advertisement.
+                                                              (line 109)
+* ipv6 nd managed-config-flag:           Router Advertisement.
+                                                              (line  84)
+* ipv6 nd mtu <1-65535>:                 Router Advertisement.
+                                                              (line 142)
+* ipv6 nd other-config-flag:             Router Advertisement.
+                                                              (line  93)
+* ipv6 nd prefix IPV6PREFIX [VALID-LIFETIME] [PREFERRED-LIFETIME] [off-link] [no-autoconfig] [router-address]: Router Advertisement.
+                                                              (line  14)
+* ipv6 nd ra-interval <1-1800>:          Router Advertisement.
+                                                              (line  49)
+* ipv6 nd ra-interval msec <70-1800000>: Router Advertisement.
+                                                              (line  56)
+* ipv6 nd ra-lifetime <0-9000>:          Router Advertisement.
+                                                              (line  63)
+* ipv6 nd reachable-time <1-3600000>:    Router Advertisement.
+                                                              (line  75)
+* ipv6 nd router-preference (high|medium|low): Router Advertisement.
+                                                              (line 135)
+* ipv6 nd suppress-ra:                   Router Advertisement.
+                                                              (line  10)
+* ipv6 ospf6 cost COST:                  OSPF6 interface.     (line   7)
+* ipv6 ospf6 dead-interval DEADINTERVAL: OSPF6 interface.     (line  14)
+* ipv6 ospf6 hello-interval HELLOINTERVAL: OSPF6 interface.   (line  11)
+* ipv6 ospf6 network (broadcast|point-to-point): OSPF6 interface.
+                                                              (line  27)
+* ipv6 ospf6 priority PRIORITY:          OSPF6 interface.     (line  21)
+* ipv6 ospf6 retransmit-interval RETRANSMITINTERVAL: OSPF6 interface.
+                                                              (line  18)
+* ipv6 ospf6 transmit-delay TRANSMITDELAY: OSPF6 interface.   (line  24)
+* ipv6 route NETWORK GATEWAY:            Static Route Commands.
+                                                              (line  77)
+* ipv6 route NETWORK GATEWAY DISTANCE:   Static Route Commands.
+                                                              (line  78)
+* is-type [level-1 | level-1-2 | level-2-only]: ISIS region.  (line   7)
+* isis circuit-type [level-1 | level-1-2 | level-2]: ISIS interface.
+                                                              (line  14)
+* isis csnp-interval <1-600>:            ISIS interface.      (line  21)
+* isis csnp-interval <1-600> [level-1 | level-2]: ISIS interface.
+                                                              (line  22)
+* isis hello padding:                    ISIS interface.      (line  28)
+* isis hello-interval <1-600>:           ISIS interface.      (line  31)
+* isis hello-interval <1-600> [level-1 | level-2]: ISIS interface.
+                                                              (line  32)
+* isis hello-multiplier <2-100>:         ISIS interface.      (line  38)
+* isis hello-multiplier <2-100> [level-1 | level-2]: ISIS interface.
+                                                              (line  40)
+* isis metric [<0-255> | <0-16777215>]:  ISIS interface.      (line  46)
+* isis metric [<0-255> | <0-16777215>] [level-1 | level-2]: ISIS interface.
+                                                              (line  48)
+* isis network point-to-point:           ISIS interface.      (line  55)
+* isis passive:                          ISIS interface.      (line  59)
+* isis password [clear | md5] <password>: ISIS interface.     (line  63)
+* isis priority <0-127>:                 ISIS interface.      (line  68)
+* isis priority <0-127> [level-1 | level-2]: ISIS interface.  (line  69)
+* isis psnp-interval <1-120>:            ISIS interface.      (line  75)
+* isis psnp-interval <1-120> [level-1 | level-2]: ISIS interface.
+                                                              (line  76)
+* line vty:                              Basic Config Commands.
+                                                              (line 127)
+* link-detect:                           Standard Commands.   (line  37)
+* link-params:                           Link Parameters Commands.
+                                                              (line   7)
+* list:                                  Terminal Mode Commands.
+                                                              (line  24)
+* log commands:                          Basic Config Commands.
+                                                              (line 111)
+* log facility FACILITY:                 Basic Config Commands.
+                                                              (line  81)
+* log file FILENAME:                     Basic Config Commands.
+                                                              (line  41)
+* log file FILENAME LEVEL:               Basic Config Commands.
+                                                              (line  42)
+* log monitor:                           Basic Config Commands.
+                                                              (line  68)
+* log monitor LEVEL:                     Basic Config Commands.
+                                                              (line  69)
+* log record-priority:                   Basic Config Commands.
+                                                              (line  87)
+* log stdout:                            Basic Config Commands.
+                                                              (line  28)
+* log stdout LEVEL:                      Basic Config Commands.
+                                                              (line  29)
+* log syslog:                            Basic Config Commands.
+                                                              (line  59)
+* log syslog LEVEL:                      Basic Config Commands.
+                                                              (line  60)
+* log timestamp precision <0-6>:         Basic Config Commands.
+                                                              (line  97)
+* log trap LEVEL:                        Basic Config Commands.
+                                                              (line  17)
+* log-adjacency-changes:                 ISIS router.         (line  33)
+* log-adjacency-changes [detail]:        OSPF router.         (line  73)
+* logmsg LEVEL MESSAGE:                  Terminal Mode Commands.
+                                                              (line  34)
+* lsp-gen-interval <1-120>:              ISIS Timer.          (line   7)
+* lsp-gen-interval [level-1 | level-2] <1-120>: ISIS Timer.   (line   8)
+* lsp-refresh-interval <1-65235>:        ISIS Timer.          (line  14)
+* lsp-refresh-interval [level-1 | level-2] <1-65235>: ISIS Timer.
+                                                              (line  15)
+* match as-path WORD:                    Using AS Path in Route Map.
+                                                              (line   7)
+* match aspath AS_PATH:                  Route Map Match Command.
+                                                              (line  13)
+* match community COMMUNITY_LIST:        Route Map Match Command.
+                                                              (line  22)
+* match community WORD:                  BGP Community in Route Map.
+                                                              (line  13)
+* match community WORD exact-match:      BGP Community in Route Map.
+                                                              (line  14)
+* match extcommunity WORD:               BGP Extended Communities in Route Map.
+                                                              (line   7)
+* match interface WORD:                  RIP route-map.       (line  26)
+* match ip address ACCESS_LIST:          Route Map Match Command.
+                                                              (line   7)
+* match ip address prefix-list WORD:     RIP route-map.       (line  39)
+* match ip address WORD:                 RIP route-map.       (line  38)
+* match ip next-hop IPV4_ADDR:           Route Map Match Command.
+                                                              (line  10)
+* match ip next-hop prefix-list WORD:    RIP route-map.       (line  43)
+* match ip next-hop WORD:                RIP route-map.       (line  42)
+* match local-preference METRIC:         Route Map Match Command.
+                                                              (line  19)
+* match metric <0-4294967295>:           RIP route-map.       (line  48)
+* match metric METRIC:                   Route Map Match Command.
+                                                              (line  16)
+* match peer {A.B.C.D|X:X::X:X}:         Commands for configuring a Route Server.
+                                                              (line  34)
+* max-bw BANDWIDTH:                      Link Parameters Commands.
+                                                              (line  23)
+* max-lsp-lifetime <360-65535>:          ISIS Timer.          (line  28)
+* max-lsp-lifetime [level-1 | level-2] <360-65535>: ISIS Timer.
+                                                              (line  29)
+* max-metric router-lsa [on-startup|on-shutdown] <5-86400>: OSPF router.
+                                                              (line 130)
+* max-metric router-lsa administrative:  OSPF router.         (line 131)
+* max-rsv-bw BANDWIDTH:                  Link Parameters Commands.
+                                                              (line  24)
+* metric <0-4294967295>:                 Link Parameters Commands.
+                                                              (line  22)
+* metric-style [narrow | transition | wide]: ISIS router.     (line  37)
+* mpls-te inter-as area <area-id>|as:    OSPF Traffic Engineering.
+                                                              (line  17)
+* mpls-te on <1>:                        ISIS Traffic Engineering.
+                                                              (line   7)
+* mpls-te on:                            OSPF Traffic Engineering.
+                                                              (line   7)
+* mpls-te router-address <A.B.C.D> <1>:  ISIS Traffic Engineering.
+                                                              (line  11)
+* mpls-te router-address <A.B.C.D>:      OSPF Traffic Engineering.
+                                                              (line  11)
+* multicast:                             Standard Commands.   (line  27)
+* neigbor {A.B.C.D|X.X::X.X|peer-group} route-map WORD {import|export}: Commands for configuring a Route Server.
+                                                              (line  29)
+* neighbor <A.B.C.D> as <0-65535>:       Link Parameters Commands.
+                                                              (line  56)
+* neighbor A.B.C.D:                      RIP Configuration.   (line  34)
+* neighbor A.B.C.D route-server-client:  Commands for configuring a Route Server.
+                                                              (line  11)
+* neighbor PEER default-originate:       BGP Peer commands.   (line  61)
+* neighbor PEER description ...:         BGP Peer commands.   (line  20)
+* neighbor PEER distribute-list NAME [in|out]: Peer filtering.
+                                                              (line   7)
+* neighbor PEER dont-capability-negotiate: Capability Negotiation.
+                                                              (line  51)
+* neighbor PEER ebgp-multihop:           BGP Peer commands.   (line  17)
+* neighbor PEER filter-list NAME [in|out]: Peer filtering.    (line  13)
+* neighbor PEER interface IFNAME:        BGP Peer commands.   (line  33)
+* neighbor PEER local-as AS-NUMBER:      BGP Peer commands.   (line  81)
+* neighbor PEER local-as AS-NUMBER no-prepend: BGP Peer commands.
+                                                              (line  82)
+* neighbor PEER local-as AS-NUMBER no-prepend replace-as: BGP Peer commands.
+                                                              (line  83)
+* neighbor PEER maximum-prefix NUMBER:   BGP Peer commands.   (line  78)
+* neighbor PEER next-hop-self [all]:     BGP Peer commands.   (line  43)
+* neighbor PEER override-capability:     Capability Negotiation.
+                                                              (line  67)
+* neighbor PEER peer-group WORD:         BGP Peer Group.      (line  10)
+* neighbor PEER port PORT:               BGP Peer commands.   (line  67)
+* neighbor PEER prefix-list NAME [in|out]: Peer filtering.    (line  11)
+* neighbor PEER remote-as ASN:           Defining Peer.       (line   7)
+* neighbor PEER route-map NAME [in|out]: Peer filtering.      (line  15)
+* neighbor PEER route-reflector-client:  Route Reflector.     (line   9)
+* neighbor PEER send-community:          BGP Peer commands.   (line  70)
+* neighbor PEER shutdown:                BGP Peer commands.   (line  10)
+* neighbor PEER strict-capability-match: Capability Negotiation.
+                                                              (line  40)
+* neighbor PEER ttl-security hops NUMBER: BGP Peer commands.  (line 102)
+* neighbor PEER update-source <IFNAME|ADDRESS>: BGP Peer commands.
+                                                              (line  50)
+* neighbor PEER version VERSION:         BGP Peer commands.   (line  24)
+* neighbor PEER weight WEIGHT:           BGP Peer commands.   (line  73)
+* neighbor PEER-GROUP route-server-client: Commands for configuring a Route Server.
+                                                              (line  10)
+* neighbor WORD peer-group:              BGP Peer Group.      (line   7)
+* neighbor X:X::X:X route-server-client: Commands for configuring a Route Server.
+                                                              (line  12)
+* net XX.XXXX. ... .XXX.XX:              ISIS router.         (line  18)
+* network A.B.C.D/M:                     BGP route.           (line   7)
+* network A.B.C.D/M area <0-4294967295>: OSPF router.         (line 175)
+* network A.B.C.D/M area A.B.C.D:        OSPF router.         (line 174)
+* network IFNAME <1>:                    ripngd Configuration.
+                                                              (line  18)
+* network IFNAME:                        RIP Configuration.   (line  27)
+* network NETWORK <1>:                   ripngd Configuration.
+                                                              (line  15)
+* network NETWORK:                       RIP Configuration.   (line  15)
+* no agentx:                             MIB and command reference.
+                                                              (line  36)
+* no aggregate-address A.B.C.D/M:        Route Aggregation.   (line  18)
+* no area <0-4294967295> authentication: OSPF area.           (line 129)
+* no area <0-4294967295> export-list NAME: OSPF area.         (line  87)
+* no area <0-4294967295> filter-list prefix NAME in: OSPF area.
+                                                              (line 121)
+* no area <0-4294967295> filter-list prefix NAME out: OSPF area.
+                                                              (line 122)
+* no area <0-4294967295> import-list NAME: OSPF area.         (line 111)
+* no area <0-4294967295> range A.B.C.D/M: OSPF area.          (line  10)
+* no area <0-4294967295> shortcut:       OSPF area.           (line  57)
+* no area <0-4294967295> stub:           OSPF area.           (line  64)
+* no area <0-4294967295> stub no-summary: OSPF area.          (line  76)
+* no area <0-4294967295> virtual-link A.B.C.D: OSPF area.     (line  52)
+* no area A.B.C.D authentication:        OSPF area.           (line 128)
+* no area A.B.C.D default-cost <0-16777215>: OSPF area.       (line  81)
+* no area A.B.C.D export-list NAME:      OSPF area.           (line  86)
+* no area A.B.C.D filter-list prefix NAME in: OSPF area.      (line 119)
+* no area A.B.C.D filter-list prefix NAME out: OSPF area.     (line 120)
+* no area A.B.C.D import-list NAME:      OSPF area.           (line 110)
+* no area A.B.C.D range A.B.C.D/M:       OSPF area.           (line   9)
+* no area A.B.C.D range IPV4_PREFIX not-advertise: OSPF area. (line  29)
+* no area A.B.C.D range IPV4_PREFIX substitute IPV4_PREFIX: OSPF area.
+                                                              (line  36)
+* no area A.B.C.D shortcut:              OSPF area.           (line  56)
+* no area A.B.C.D stub:                  OSPF area.           (line  63)
+* no area A.B.C.D stub no-summary:       OSPF area.           (line  75)
+* no area A.B.C.D virtual-link A.B.C.D:  OSPF area.           (line  51)
+* no area-password:                      ISIS router.         (line  28)
+* no auto-cost reference-bandwidth <1>:  OSPF6 router.        (line  52)
+* no auto-cost reference-bandwidth:      OSPF router.         (line 164)
+* no bandwidth <1-10000000>:             Standard Commands.   (line  32)
+* no banner motd:                        Basic Config Commands.
+                                                              (line 133)
+* no bgp multiple-instance:              Multiple instance.   (line  14)
+* no capability opaque:                  Opaque LSA.          (line  10)
+* no debug event:                        More Show IP BGP.    (line  45)
+* no debug isis adj-packets:             Debugging ISIS.      (line   8)
+* no debug isis checksum-errors:         Debugging ISIS.      (line  12)
+* no debug isis events:                  Debugging ISIS.      (line  16)
+* no debug isis local-updates:           Debugging ISIS.      (line  20)
+* no debug isis packet-dump:             Debugging ISIS.      (line  24)
+* no debug isis protocol-errors:         Debugging ISIS.      (line  28)
+* no debug isis route-events:            Debugging ISIS.      (line  32)
+* no debug isis snp-packets:             Debugging ISIS.      (line  36)
+* no debug isis spf-events:              Debugging ISIS.      (line  42)
+* no debug isis spf-statistics:          Debugging ISIS.      (line  43)
+* no debug isis spf-triggers:            Debugging ISIS.      (line  44)
+* no debug isis update-packets:          Debugging ISIS.      (line  49)
+* no debug keepalive:                    More Show IP BGP.    (line  49)
+* no debug ospf event:                   Debugging OSPF.      (line  26)
+* no debug ospf ism:                     Debugging OSPF.      (line  15)
+* no debug ospf ism (status|events|timers): Debugging OSPF.   (line  16)
+* no debug ospf lsa:                     Debugging OSPF.      (line  35)
+* no debug ospf lsa (generate|flooding|refresh): Debugging OSPF.
+                                                              (line  36)
+* no debug ospf nsm:                     Debugging OSPF.      (line  21)
+* no debug ospf nsm (status|events|timers): Debugging OSPF.   (line  22)
+* no debug ospf nssa:                    Debugging OSPF.      (line  30)
+* no debug ospf packet (hello|dd|ls-request|ls-update|ls-ack|all) (send|recv) [detail]: Debugging OSPF.
+                                                              (line  10)
+* no debug ospf te:                      Debugging OSPF.      (line  40)
+* no debug ospf zebra:                   Debugging OSPF.      (line  45)
+* no debug ospf zebra (interface|redistribute): Debugging OSPF.
+                                                              (line  46)
+* no debug update:                       More Show IP BGP.    (line  47)
+* no default-information originate:      Redistribute routes to OSPF.
+                                                              (line  50)
+* no default-metric:                     Redistribute routes to OSPF.
+                                                              (line  66)
+* no default-metric <1-16>:              RIP Metric Manipulation.
+                                                              (line  12)
+* no distance <1-255> <1>:               Redistribute routes to OSPF.
+                                                              (line  69)
+* no distance <1-255>:                   RIP distance.        (line  10)
+* no distance <1-255> A.B.C.D/M:         RIP distance.        (line  14)
+* no distance <1-255> A.B.C.D/M ACCESS-LIST: RIP distance.    (line  19)
+* no distance ospf:                      Redistribute routes to OSPF.
+                                                              (line  73)
+* no distribute-list NAME out (kernel|connected|static|rip|ospf: Redistribute routes to OSPF.
+                                                              (line  60)
+* no domain-password:                    ISIS router.         (line  29)
+* no dump bgp all [PATH] [INTERVAL]:     Dump BGP packets and table.
+                                                              (line   9)
+* no dump bgp route-mrt [PATH] [INTERVAL]: Dump BGP packets and table.
+                                                              (line  27)
+* no dump bgp updates [PATH] [INTERVAL]: Dump BGP packets and table.
+                                                              (line  18)
+* no exec-timeout:                       Basic Config Commands.
+                                                              (line 144)
+* no hostname dynamic:                   ISIS router.         (line  23)
+* no ip address ADDRESS/PREFIX:          Standard Commands.   (line  15)
+* no ip address ADDRESS/PREFIX secondary: Standard Commands.  (line  20)
+* no ip as-path access-list WORD:        AS Path Access List. (line  12)
+* no ip as-path access-list WORD {permit|deny} LINE: AS Path Access List.
+                                                              (line  13)
+* no ip community-list expanded NAME:    BGP Community Lists. (line  37)
+* no ip community-list NAME:             BGP Community Lists. (line  35)
+* no ip community-list standard NAME:    BGP Community Lists. (line  36)
+* no ip extcommunity-list expanded NAME: BGP Extended Community Lists.
+                                                              (line  29)
+* no ip extcommunity-list NAME:          BGP Extended Community Lists.
+                                                              (line  27)
+* no ip extcommunity-list standard NAME: BGP Extended Community Lists.
+                                                              (line  28)
+* no ip mroute PREFIX NEXTHOP [DISTANCE]: Multicast RIB Commands.
+                                                              (line  73)
+* no ip multicast rpf-lookup-mode [MODE]: Multicast RIB Commands.
+                                                              (line  20)
+* no ip ospf area [ADDR]:                OSPF interface.      (line   8)
+* no ip ospf authentication-key:         OSPF interface.      (line  20)
+* no ip ospf cost:                       OSPF interface.      (line  58)
+* no ip ospf dead-interval:              OSPF interface.      (line  65)
+* no ip ospf hello-interval:             OSPF interface.      (line  82)
+* no ip ospf message-digest-key:         OSPF interface.      (line  46)
+* no ip ospf network:                    OSPF interface.      (line  93)
+* no ip ospf priority:                   OSPF interface.      (line  97)
+* no ip ospf retransmit interval:        OSPF interface.      (line 104)
+* no ip ospf transmit-delay:             OSPF interface.      (line 110)
+* no ip prefix-list NAME:                IP Prefix List.      (line  67)
+* no ip prefix-list NAME description [DESC]: ip prefix-list description.
+                                                              (line  11)
+* no ip prefix-list sequence-number:     ip prefix-list sequential number control.
+                                                              (line  11)
+* no ip rip authentication key-chain KEY-CHAIN: RIP Authentication.
+                                                              (line  44)
+* no ip rip authentication mode md5:     RIP Authentication.  (line  30)
+* no ip rip authentication mode text:    RIP Authentication.  (line  34)
+* no ip rip authentication string STRING: RIP Authentication. (line  38)
+* no ip router isis WORD:                ISIS interface.      (line   8)
+* no ip split-horizon:                   RIP Configuration.   (line  71)
+* no ipv6 address ADDRESS/PREFIX:        Standard Commands.   (line  16)
+* no ipv6 nd adv-interval-option:        Router Advertisement.
+                                                              (line 128)
+* no ipv6 nd home-agent-config-flag:     Router Advertisement.
+                                                              (line 102)
+* no ipv6 nd home-agent-lifetime [<0-65520>]: Router Advertisement.
+                                                              (line 119)
+* no ipv6 nd home-agent-preference [<0-65535>]: Router Advertisement.
+                                                              (line 110)
+* no ipv6 nd managed-config-flag:        Router Advertisement.
+                                                              (line  85)
+* no ipv6 nd mtu [<1-65535>]:            Router Advertisement.
+                                                              (line 143)
+* no ipv6 nd other-config-flag:          Router Advertisement.
+                                                              (line  94)
+* no ipv6 nd ra-interval [<1-1800>]:     Router Advertisement.
+                                                              (line  50)
+* no ipv6 nd ra-interval [msec <70-1800000>]: Router Advertisement.
+                                                              (line  57)
+* no ipv6 nd ra-lifetime [<0-9000>]:     Router Advertisement.
+                                                              (line  64)
+* no ipv6 nd reachable-time [<1-3600000>]: Router Advertisement.
+                                                              (line  76)
+* no ipv6 nd router-preference [(high|medium|low)]: Router Advertisement.
+                                                              (line 136)
+* no ipv6 nd suppress-ra:                Router Advertisement.
+                                                              (line   7)
+* no is-type:                            ISIS region.         (line   8)
+* no isis circuit-type:                  ISIS interface.      (line  15)
+* no isis csnp-interval:                 ISIS interface.      (line  23)
+* no isis csnp-interval [level-1 | level-2]: ISIS interface.  (line  24)
+* no isis hello-interval:                ISIS interface.      (line  33)
+* no isis hello-interval [level-1 | level-2]: ISIS interface. (line  34)
+* no isis hello-multiplier:              ISIS interface.      (line  41)
+* no isis hello-multiplier [level-1 | level-2]: ISIS interface.
+                                                              (line  42)
+* no isis metric:                        ISIS interface.      (line  49)
+* no isis metric [level-1 | level-2]:    ISIS interface.      (line  50)
+* no isis network point-to-point:        ISIS interface.      (line  56)
+* no isis passive:                       ISIS interface.      (line  60)
+* no isis password:                      ISIS interface.      (line  64)
+* no isis priority:                      ISIS interface.      (line  70)
+* no isis priority [level-1 | level-2]:  ISIS interface.      (line  71)
+* no isis psnp-interval:                 ISIS interface.      (line  77)
+* no isis psnp-interval [level-1 | level-2]: ISIS interface.  (line  78)
+* no link-detect:                        Standard Commands.   (line  38)
+* no link-param:                         Link Parameters Commands.
+                                                              (line   8)
+* no log facility:                       Basic Config Commands.
+                                                              (line  82)
+* no log file:                           Basic Config Commands.
+                                                              (line  43)
+* no log monitor:                        Basic Config Commands.
+                                                              (line  70)
+* no log record-priority:                Basic Config Commands.
+                                                              (line  88)
+* no log stdout:                         Basic Config Commands.
+                                                              (line  30)
+* no log syslog:                         Basic Config Commands.
+                                                              (line  61)
+* no log timestamp precision:            Basic Config Commands.
+                                                              (line  98)
+* no log trap:                           Basic Config Commands.
+                                                              (line  18)
+* no log-adjacency-changes:              ISIS router.         (line  34)
+* no log-adjacency-changes [detail]:     OSPF router.         (line  74)
+* no lsp-gen-interval:                   ISIS Timer.          (line   9)
+* no lsp-gen-interval [level-1 | level-2]: ISIS Timer.        (line  10)
+* no lsp-refresh-interval:               ISIS Timer.          (line  16)
+* no lsp-refresh-interval [level-1 | level-2]: ISIS Timer.    (line  17)
+* no max-lsp-lifetime:                   ISIS Timer.          (line  30)
+* no max-lsp-lifetime [level-1 | level-2]: ISIS Timer.        (line  31)
+* no max-metric router-lsa [on-startup|on-shutdown|administrative]: OSPF router.
+                                                              (line 133)
+* no metric-style:                       ISIS router.         (line  38)
+* no mpls-te <1>:                        ISIS Traffic Engineering.
+                                                              (line   8)
+* no mpls-te:                            OSPF Traffic Engineering.
+                                                              (line   8)
+* no mpls-te inter-as:                   OSPF Traffic Engineering.
+                                                              (line  18)
+* no mpls-te router-address:             ISIS Traffic Engineering.
+                                                              (line  12)
+* no multicast:                          Standard Commands.   (line  28)
+* no neighbor:                           Link Parameters Commands.
+                                                              (line  57)
+* no neighbor A.B.C.D:                   RIP Configuration.   (line  35)
+* no neighbor PEER default-originate:    BGP Peer commands.   (line  62)
+* no neighbor PEER description ...:      BGP Peer commands.   (line  21)
+* no neighbor PEER dont-capability-negotiate: Capability Negotiation.
+                                                              (line  52)
+* no neighbor PEER ebgp-multihop:        BGP Peer commands.   (line  18)
+* no neighbor PEER interface IFNAME:     BGP Peer commands.   (line  34)
+* no neighbor PEER local-as:             BGP Peer commands.   (line  84)
+* no neighbor PEER maximum-prefix NUMBER: BGP Peer commands.  (line  79)
+* no neighbor PEER next-hop-self [all]:  BGP Peer commands.   (line  44)
+* no neighbor PEER override-capability:  Capability Negotiation.
+                                                              (line  68)
+* no neighbor PEER route-reflector-client: Route Reflector.   (line  10)
+* no neighbor PEER shutdown:             BGP Peer commands.   (line  11)
+* no neighbor PEER strict-capability-match: Capability Negotiation.
+                                                              (line  41)
+* no neighbor PEER ttl-security hops NUMBER: BGP Peer commands.
+                                                              (line 103)
+* no neighbor PEER update-source:        BGP Peer commands.   (line  51)
+* no neighbor PEER weight WEIGHT:        BGP Peer commands.   (line  74)
+* no net XX.XXXX. ... .XXX.XX:           ISIS router.         (line  19)
+* no network A.B.C.D/M:                  BGP route.           (line  16)
+* no network A.B.C.D/M area <0-4294967295>: OSPF router.      (line 177)
+* no network A.B.C.D/M area A.B.C.D:     OSPF router.         (line 176)
+* no network IFNAME:                     RIP Configuration.   (line  28)
+* no network NETWORK:                    RIP Configuration.   (line  16)
+* no ospf abr-type TYPE:                 OSPF router.         (line  27)
+* no ospf opaque-lsa:                    Opaque LSA.          (line   9)
+* no ospf rfc1583compatibility:          OSPF router.         (line  63)
+* no ospf router-id:                     OSPF router.         (line  17)
+* no passive-interface IFNAME:           RIP Configuration.   (line  58)
+* no passive-interface INTERFACE:        OSPF router.         (line  80)
+* no pce address:                        Router Information.  (line  13)
+* no pce domain as <0-65535>:            Router Information.  (line  15)
+* no pce flag:                           Router Information.  (line  19)
+* no pce neighbor as <0-65535>:          Router Information.  (line  17)
+* no pce scope:                          Router Information.  (line  21)
+* no redistribute (kernel|connected|static|rip|bgp): Redistribute routes to OSPF.
+                                                              (line  22)
+* no redistribute bgp:                   How to Announce RIP route.
+                                                              (line  44)
+* no redistribute connected:             How to Announce RIP route.
+                                                              (line  26)
+* no redistribute kernel:                How to Announce RIP route.
+                                                              (line  10)
+* no redistribute ospf:                  How to Announce RIP route.
+                                                              (line  36)
+* no redistribute static:                How to Announce RIP route.
+                                                              (line  18)
+* no route A.B.C.D/M:                    How to Announce RIP route.
+                                                              (line  54)
+* no router bgp ASN:                     BGP router.          (line  19)
+* no router isis WORD:                   ISIS router.         (line  11)
+* no router ospf:                        OSPF router.         (line  11)
+* no router rip:                         RIP Configuration.   (line  12)
+* no router-info:                        Router Information.  (line   8)
+* no set-overload-bit:                   ISIS router.         (line  45)
+* no shutdown:                           Standard Commands.   (line  10)
+* no smux peer OID:                      MIB and command reference.
+                                                              (line  28)
+* no smux peer OID PASSWORD:             MIB and command reference.
+                                                              (line  31)
+* no spf-interval:                       ISIS Timer.          (line  37)
+* no spf-interval [level-1 | level-2]:   ISIS Timer.          (line  38)
+* no timers basic:                       RIP Timers.          (line  31)
+* no timers throttle spf <1>:            OSPF6 router.        (line  18)
+* no timers throttle spf:                OSPF router.         (line  92)
+* no version:                            RIP Version Control. (line  30)
+* offset-list ACCESS-LIST (in|out):      RIP Metric Manipulation.
+                                                              (line  20)
+* offset-list ACCESS-LIST (in|out) IFNAME: RIP Metric Manipulation.
+                                                              (line  21)
+* on-match goto N:                       Route Map Exit Action Command.
+                                                              (line  11)
+* on-match next:                         Route Map Exit Action Command.
+                                                              (line   7)
+* ospf abr-type TYPE:                    OSPF router.         (line  26)
+* ospf opaque-lsa:                       Opaque LSA.          (line   7)
+* ospf rfc1583compatibility:             OSPF router.         (line  62)
+* ospf router-id A.B.C.D:                OSPF router.         (line  16)
+* packet-loss PERCENTAGE:                Link Parameters Commands.
+                                                              (line  40)
+* passive-interface (IFNAME|default):    RIP Configuration.   (line  57)
+* passive-interface INTERFACE:           OSPF router.         (line  79)
+* password PASSWORD:                     Basic Config Commands.
+                                                              (line  10)
+* pce address <A.B.C.D>:                 Router Information.  (line  12)
+* pce domain as <0-65535>:               Router Information.  (line  14)
+* pce flag BITPATTERN:                   Router Information.  (line  18)
+* pce neighbor as <0-65535>:             Router Information.  (line  16)
+* pce scope BITPATTERN:                  Router Information.  (line  20)
+* redistribute (kernel|connected|static|rip|bgp): Redistribute routes to OSPF.
+                                                              (line   7)
+* redistribute (kernel|connected|static|rip|bgp) metric <0-16777214>: Redistribute routes to OSPF.
+                                                              (line  15)
+* redistribute (kernel|connected|static|rip|bgp) metric <0-16777214> route-map WORD: Redistribute routes to OSPF.
+                                                              (line  17)
+* redistribute (kernel|connected|static|rip|bgp) metric-type (1|2): Redistribute routes to OSPF.
+                                                              (line  11)
+* redistribute (kernel|connected|static|rip|bgp) metric-type (1|2) metric <0-16777214>: Redistribute routes to OSPF.
+                                                              (line  19)
+* redistribute (kernel|connected|static|rip|bgp) metric-type (1|2) metric <0-16777214> route-map WORD: Redistribute routes to OSPF.
+                                                              (line  21)
+* redistribute (kernel|connected|static|rip|bgp) metric-type (1|2) route-map WORD: Redistribute routes to OSPF.
+                                                              (line  13)
+* redistribute (kernel|connected|static|rip|bgp) ROUTE-MAP: Redistribute routes to OSPF.
+                                                              (line   9)
+* redistribute bgp:                      How to Announce RIP route.
+                                                              (line  41)
+* redistribute bgp metric <0-16>:        How to Announce RIP route.
+                                                              (line  42)
+* redistribute bgp route-map ROUTE-MAP:  How to Announce RIP route.
+                                                              (line  43)
+* redistribute connected <1>:            Redistribute to BGP. (line  13)
+* redistribute connected <2>:            Redistribute routes to OSPF6.
+                                                              (line   8)
+* redistribute connected:                How to Announce RIP route.
+                                                              (line  23)
+* redistribute connected metric <0-16>:  How to Announce RIP route.
+                                                              (line  24)
+* redistribute connected route-map ROUTE-MAP: How to Announce RIP route.
+                                                              (line  25)
+* redistribute kernel <1>:               Redistribute to BGP. (line   7)
+* redistribute kernel:                   How to Announce RIP route.
+                                                              (line   7)
+* redistribute kernel metric <0-16>:     How to Announce RIP route.
+                                                              (line   8)
+* redistribute kernel route-map ROUTE-MAP: How to Announce RIP route.
+                                                              (line   9)
+* redistribute ospf <1>:                 Redistribute to BGP. (line  19)
+* redistribute ospf:                     How to Announce RIP route.
+                                                              (line  33)
+* redistribute ospf metric <0-16>:       How to Announce RIP route.
+                                                              (line  34)
+* redistribute ospf route-map ROUTE-MAP: How to Announce RIP route.
+                                                              (line  35)
+* redistribute rip:                      Redistribute to BGP. (line  16)
+* redistribute ripng:                    Redistribute routes to OSPF6.
+                                                              (line   9)
+* redistribute static <1>:               Redistribute to BGP. (line  10)
+* redistribute static <2>:               Redistribute routes to OSPF6.
+                                                              (line   7)
+* redistribute static:                   How to Announce RIP route.
+                                                              (line  15)
+* redistribute static metric <0-16>:     How to Announce RIP route.
+                                                              (line  16)
+* redistribute static route-map ROUTE-MAP: How to Announce RIP route.
+                                                              (line  17)
+* res-bw BANDWIDTH:                      Link Parameters Commands.
+                                                              (line  41)
+* route A.B.C.D/M:                       How to Announce RIP route.
+                                                              (line  53)
+* route NETWORK:                         ripngd Configuration.
+                                                              (line  21)
+* route-map ROUTE-MAP-NAME (permit|deny) ORDER: Route Map Command.
+                                                              (line   7)
+* router bgp AS-NUMBER:                  BGP instance and view.
+                                                              (line  11)
+* router bgp AS-NUMBER view NAME:        BGP instance and view.
+                                                              (line  28)
+* router bgp ASN:                        BGP router.          (line  13)
+* router isis WORD:                      ISIS router.         (line  10)
+* router ospf:                           OSPF router.         (line  10)
+* router ospf6:                          OSPF6 router.        (line   7)
+* router rip:                            RIP Configuration.   (line   7)
+* router ripng:                          ripngd Configuration.
+                                                              (line   9)
+* router zebra:                          ripngd Configuration.
+                                                              (line  24)
+* router-id A.B.C.D:                     OSPF6 router.        (line   9)
+* router-info [as | area <A.B.C.D>]:     Router Information.  (line   7)
+* service advanced-vty:                  Basic Config Commands.
+                                                              (line 120)
+* service integrated-vtysh-config:       VTY shell integrated configuration.
+                                                              (line   7)
+* service password-encryption:           Basic Config Commands.
+                                                              (line 117)
+* service terminal-length <0-512>:       Basic Config Commands.
+                                                              (line 123)
+* set as-path prepend AS-PATH:           Using AS Path in Route Map.
+                                                              (line   9)
+* set as-path prepend AS_PATH:           Route Map Set Command.
+                                                              (line  19)
+* set as-path prepend last-as NUM:       Using AS Path in Route Map.
+                                                              (line  12)
+* set comm-list WORD delete:             BGP Community in Route Map.
+                                                              (line  34)
+* set community COMMUNITY <1>:           Route Map Set Command.
+                                                              (line  22)
+* set community COMMUNITY:               BGP Community in Route Map.
+                                                              (line  23)
+* set community COMMUNITY additive:      BGP Community in Route Map.
+                                                              (line  24)
+* set community none:                    BGP Community in Route Map.
+                                                              (line  22)
+* set extcommunity rt EXTCOMMUNITY:      BGP Extended Communities in Route Map.
+                                                              (line   9)
+* set extcommunity soo EXTCOMMUNITY:     BGP Extended Communities in Route Map.
+                                                              (line  12)
+* set ip next-hop A.B.C.D:               RIP route-map.       (line  53)
+* set ip next-hop IPV4_ADDRESS:          Route Map Set Command.
+                                                              (line   7)
+* set ipv6 next-hop global IPV6_ADDRESS: Route Map Set Command.
+                                                              (line  25)
+* set ipv6 next-hop local IPV6_ADDRESS:  Route Map Set Command.
+                                                              (line  28)
+* set local-preference LOCAL_PREF:       Route Map Set Command.
+                                                              (line  10)
+* set metric <0-4294967295>:             RIP route-map.       (line  58)
+* set metric METRIC:                     Route Map Set Command.
+                                                              (line  16)
+* set src ADDRESS:                       zebra Route Filtering.
+                                                              (line  17)
+* set weight WEIGHT:                     Route Map Set Command.
+                                                              (line  13)
+* set-overload-bit:                      ISIS router.         (line  44)
+* show bgp ipv4 encap summary:           BGP Address Family.  (line  24)
+* show bgp ipv4 vpn summary:             BGP Address Family.  (line  25)
+* show bgp ipv6 encap summary:           BGP Address Family.  (line  26)
+* show bgp ipv6 vpn summary:             BGP Address Family.  (line  27)
+* show debug:                            More Show IP BGP.    (line  37)
+* show debugging isis:                   Debugging ISIS.      (line  52)
+* show debugging ospf:                   Debugging OSPF.      (line  49)
+* show debugging rip:                    RIP Debug Commands.  (line  29)
+* show debugging ripng:                  ripngd Terminal Mode Commands.
+                                                              (line   9)
+* show interface:                        zebra Terminal Mode Commands.
+                                                              (line  21)
+* show ip bgp:                           Show IP BGP.         (line   7)
+* show ip bgp A.B.C.D:                   Show IP BGP.         (line   8)
+* show ip bgp community:                 Display BGP Routes by Community.
+                                                              (line  11)
+* show ip bgp community COMMUNITY <1>:   More Show IP BGP.    (line  11)
+* show ip bgp community COMMUNITY:       Display BGP Routes by Community.
+                                                              (line  12)
+* show ip bgp community COMMUNITY exact-match <1>: More Show IP BGP.
+                                                              (line  12)
+* show ip bgp community COMMUNITY exact-match: Display BGP Routes by Community.
+                                                              (line  13)
+* show ip bgp community-list WORD <1>:   More Show IP BGP.    (line  16)
+* show ip bgp community-list WORD:       Display BGP Routes by Community.
+                                                              (line  20)
+* show ip bgp community-list WORD exact-match <1>: More Show IP BGP.
+                                                              (line  17)
+* show ip bgp community-list WORD exact-match: Display BGP Routes by Community.
+                                                              (line  21)
+* show ip bgp dampened-paths:            More Show IP BGP.    (line  31)
+* show ip bgp encap all:                 BGP Address Family.  (line  19)
+* show ip bgp flap-statistics:           More Show IP BGP.    (line  34)
+* show ip bgp neighbor [PEER]:           More Show IP BGP.    (line  23)
+* show ip bgp regexp LINE <1>:           More Show IP BGP.    (line   7)
+* show ip bgp regexp LINE:               Display BGP Routes by AS Path.
+                                                              (line  10)
+* show ip bgp summary:                   More Show IP BGP.    (line  21)
+* show ip bgp view NAME:                 Viewing the view.    (line   9)
+* show ip bgp vpnv4 all:                 BGP Address Family.  (line  15)
+* show ip bgp X:X::X:X:                  Show IP BGP.         (line   9)
+* show ip community-list:                BGP Community Lists. (line  42)
+* show ip community-list NAME:           BGP Community Lists. (line  43)
+* show ip extcommunity-list:             BGP Extended Community Lists.
+                                                              (line  35)
+* show ip extcommunity-list NAME:        BGP Extended Community Lists.
+                                                              (line  36)
+* show ip ospf:                          Showing OSPF information.
+                                                              (line   7)
+* show ip ospf database:                 Showing OSPF information.
+                                                              (line  20)
+* show ip ospf database (asbr-summary|external|network|router|summary): Showing OSPF information.
+                                                              (line  23)
+* show ip ospf database (asbr-summary|external|network|router|summary) adv-router ADV-ROUTER: Showing OSPF information.
+                                                              (line  30)
+* show ip ospf database (asbr-summary|external|network|router|summary) LINK-STATE-ID: Showing OSPF information.
+                                                              (line  25)
+* show ip ospf database (asbr-summary|external|network|router|summary) LINK-STATE-ID adv-router ADV-ROUTER: Showing OSPF information.
+                                                              (line  28)
+* show ip ospf database (asbr-summary|external|network|router|summary) LINK-STATE-ID self-originate: Showing OSPF information.
+                                                              (line  33)
+* show ip ospf database (asbr-summary|external|network|router|summary) self-originate: Showing OSPF information.
+                                                              (line  35)
+* show ip ospf database (opaque-link|opaque-area|opaque-external): Opaque LSA.
+                                                              (line  17)
+* show ip ospf database (opaque-link|opaque-area|opaque-external) adv-router ADV-ROUTER: Opaque LSA.
+                                                              (line  24)
+* show ip ospf database (opaque-link|opaque-area|opaque-external) LINK-STATE-ID: Opaque LSA.
+                                                              (line  19)
+* show ip ospf database (opaque-link|opaque-area|opaque-external) LINK-STATE-ID adv-router ADV-ROUTER: Opaque LSA.
+                                                              (line  22)
+* show ip ospf database (opaque-link|opaque-area|opaque-external) LINK-STATE-ID self-originate: Opaque LSA.
+                                                              (line  26)
+* show ip ospf database (opaque-link|opaque-area|opaque-external) self-originate: Opaque LSA.
+                                                              (line  28)
+* show ip ospf database max-age:         Showing OSPF information.
+                                                              (line  37)
+* show ip ospf database self-originate:  Showing OSPF information.
+                                                              (line  39)
+* show ip ospf interface [INTERFACE]:    Showing OSPF information.
+                                                              (line  11)
+* show ip ospf mpls-te interface:        OSPF Traffic Engineering.
+                                                              (line  25)
+* show ip ospf mpls-te interface INTERFACE: OSPF Traffic Engineering.
+                                                              (line  26)
+* show ip ospf mpls-te router:           OSPF Traffic Engineering.
+                                                              (line  30)
+* show ip ospf neighbor:                 Showing OSPF information.
+                                                              (line  15)
+* show ip ospf neighbor detail:          Showing OSPF information.
+                                                              (line  17)
+* show ip ospf neighbor INTERFACE:       Showing OSPF information.
+                                                              (line  16)
+* show ip ospf neighbor INTERFACE detail: Showing OSPF information.
+                                                              (line  18)
+* show ip ospf route:                    Showing OSPF information.
+                                                              (line  41)
+* show ip ospf router-info:              Router Information.  (line  31)
+* show ip ospf router-info pce:          Router Information.  (line  34)
+* show ip prefix-list:                   Showing ip prefix-list.
+                                                              (line   7)
+* show ip prefix-list [NAME]:            zebra Terminal Mode Commands.
+                                                              (line  23)
+* show ip prefix-list detail:            Showing ip prefix-list.
+                                                              (line  31)
+* show ip prefix-list detail NAME:       Showing ip prefix-list.
+                                                              (line  33)
+* show ip prefix-list NAME:              Showing ip prefix-list.
+                                                              (line  10)
+* show ip prefix-list NAME A.B.C.D/M:    Showing ip prefix-list.
+                                                              (line  17)
+* show ip prefix-list NAME A.B.C.D/M first-match: Showing ip prefix-list.
+                                                              (line  25)
+* show ip prefix-list NAME A.B.C.D/M longer: Showing ip prefix-list.
+                                                              (line  23)
+* show ip prefix-list NAME seq NUM:      Showing ip prefix-list.
+                                                              (line  13)
+* show ip prefix-list summary:           Showing ip prefix-list.
+                                                              (line  27)
+* show ip prefix-list summary NAME:      Showing ip prefix-list.
+                                                              (line  29)
+* show ip protocol:                      zebra Terminal Mode Commands.
+                                                              (line  27)
+* show ip rip:                           Show RIP Information.
+                                                              (line   9)
+* show ip rip status:                    Show RIP Information.
+                                                              (line  17)
+* show ip ripng:                         ripngd Terminal Mode Commands.
+                                                              (line   7)
+* show ip route:                         zebra Terminal Mode Commands.
+                                                              (line   7)
+* show ip route isis:                    Showing ISIS information.
+                                                              (line  37)
+* show ip rpf:                           Multicast RIB Commands.
+                                                              (line  67)
+* show ip rpf ADDR:                      Multicast RIB Commands.
+                                                              (line  54)
+* show ipforward:                        zebra Terminal Mode Commands.
+                                                              (line  29)
+* show ipv6 bgp encap all:               BGP Address Family.  (line  20)
+* show ipv6 bgp vpn all:                 BGP Address Family.  (line  16)
+* show ipv6 ospf6 [INSTANCE_ID]:         Showing OSPF6 information.
+                                                              (line   7)
+* show ipv6 ospf6 database:              Showing OSPF6 information.
+                                                              (line  11)
+* show ipv6 ospf6 interface:             Showing OSPF6 information.
+                                                              (line  15)
+* show ipv6 ospf6 neighbor:              Showing OSPF6 information.
+                                                              (line  18)
+* show ipv6 ospf6 request-list A.B.C.D:  Showing OSPF6 information.
+                                                              (line  21)
+* show ipv6 route:                       zebra Terminal Mode Commands.
+                                                              (line  19)
+* show ipv6 route ospf6:                 Showing OSPF6 information.
+                                                              (line  24)
+* show ipv6forward:                      zebra Terminal Mode Commands.
+                                                              (line  34)
+* show isis database:                    Showing ISIS information.
+                                                              (line  25)
+* show isis database <LSP id> [detail]:  Showing ISIS information.
+                                                              (line  27)
+* show isis database [detail]:           Showing ISIS information.
+                                                              (line  26)
+* show isis database detail <LSP id>:    Showing ISIS information.
+                                                              (line  28)
+* show isis hostname:                    Showing ISIS information.
+                                                              (line  10)
+* show isis interface:                   Showing ISIS information.
+                                                              (line  13)
+* show isis interface <interface name>:  Showing ISIS information.
+                                                              (line  15)
+* show isis interface detail:            Showing ISIS information.
+                                                              (line  14)
+* show isis mpls-te interface:           ISIS Traffic Engineering.
+                                                              (line  15)
+* show isis mpls-te interface INTERFACE: ISIS Traffic Engineering.
+                                                              (line  16)
+* show isis mpls-te router:              ISIS Traffic Engineering.
+                                                              (line  20)
+* show isis neighbor:                    Showing ISIS information.
+                                                              (line  19)
+* show isis neighbor <System Id>:        Showing ISIS information.
+                                                              (line  20)
+* show isis neighbor detail:             Showing ISIS information.
+                                                              (line  21)
+* show isis summary:                     Showing ISIS information.
+                                                              (line   7)
+* show isis topology:                    Showing ISIS information.
+                                                              (line  32)
+* show isis topology [level-1|level-2]:  Showing ISIS information.
+                                                              (line  33)
+* show logging:                          Terminal Mode Commands.
+                                                              (line  30)
+* show route-map [NAME]:                 zebra Terminal Mode Commands.
+                                                              (line  25)
+* show version:                          Terminal Mode Commands.
+                                                              (line  27)
+* show zebra fpm stats:                  zebra Terminal Mode Commands.
+                                                              (line  37)
+* shutdown:                              Standard Commands.   (line   9)
+* smux peer OID:                         MIB and command reference.
+                                                              (line  27)
+* smux peer OID PASSWORD:                MIB and command reference.
+                                                              (line  30)
+* spf-interval <1-120>:                  ISIS Timer.          (line  35)
+* spf-interval [level-1 | level-2] <1-120>: ISIS Timer.       (line  36)
+* table TABLENO:                         Static Route Commands.
+                                                              (line  81)
+* terminal length <0-512>:               Terminal Mode Commands.
+                                                              (line  17)
+* timers basic UPDATE TIMEOUT GARBAGE:   RIP Timers.          (line   7)
+* timers throttle spf DELAY INITIAL-HOLDTIME MAX-HOLDTIME <1>: OSPF6 router.
+                                                              (line  17)
+* timers throttle spf DELAY INITIAL-HOLDTIME MAX-HOLDTIME: OSPF router.
+                                                              (line  91)
+* unrsv-bw <0-7> BANDWIDTH:              Link Parameters Commands.
+                                                              (line  25)
+* use-bw BANDWIDTH:                      Link Parameters Commands.
+                                                              (line  43)
+* username USERNAME nopassword:          VTY shell username.  (line   7)
+* version VERSION:                       RIP Version Control. (line  20)
+* who:                                   Terminal Mode Commands.
+                                                              (line  21)
+* write file:                            Terminal Mode Commands.
+                                                              (line  10)
+* write terminal:                        Terminal Mode Commands.
+                                                              (line   7)
+
+
+File: quagga.info,  Node: VTY Key Index,  Next: Index,  Prev: Command Index,  Up: Top
+
+VTY Key Index
+*************
+
+ [index ]
+* Menu:
+
+* <?>:                                   CLI Advanced Commands.
+                                                               (line 27)
+* <DEL>:                                 CLI Editing Commands. (line 11)
+* <DOWN>:                                CLI Advanced Commands.
+                                                               (line 17)
+* <LEFT>:                                CLI Movement Commands.
+                                                               (line 15)
+* <RIGHT>:                               CLI Movement Commands.
+                                                               (line 11)
+* <TAB>:                                 CLI Advanced Commands.
+                                                               (line 24)
+* <UP>:                                  CLI Advanced Commands.
+                                                               (line 21)
+* C-a:                                   CLI Movement Commands.
+                                                               (line 24)
+* C-b:                                   CLI Movement Commands.
+                                                               (line 15)
+* C-c:                                   CLI Advanced Commands.
+                                                               (line 10)
+* C-d:                                   CLI Editing Commands. (line 14)
+* C-e:                                   CLI Movement Commands.
+                                                               (line 27)
+* C-f:                                   CLI Movement Commands.
+                                                               (line 11)
+* C-h:                                   CLI Editing Commands. (line 11)
+* C-k:                                   CLI Editing Commands. (line 23)
+* C-n:                                   CLI Advanced Commands.
+                                                               (line 17)
+* C-p:                                   CLI Advanced Commands.
+                                                               (line 21)
+* C-t:                                   CLI Editing Commands. (line 29)
+* C-u:                                   CLI Editing Commands. (line 26)
+* C-w:                                   CLI Editing Commands. (line 20)
+* C-z:                                   CLI Advanced Commands.
+                                                               (line 13)
+* M-b:                                   CLI Movement Commands.
+                                                               (line 21)
+* M-d:                                   CLI Editing Commands. (line 17)
+* M-f:                                   CLI Movement Commands.
+                                                               (line 18)
+
+
+File: quagga.info,  Node: Index,  Prev: VTY Key Index,  Up: Top
+
+Index
+*****
+
+ [index ]
+* Menu:
+
+* About Quagga:                          About Quagga.        (line   6)
+* Bug hunting:                           Bug Reports.         (line   6)
+* Bug Reports:                           Bug Reports.         (line   6)
+* Build options:                         The Configure script and its options.
+                                                              (line   6)
+* Building on Linux boxes:               Linux notes.         (line   6)
+* Building the system:                   Installation.        (line   6)
+* Compatibility with other systems:      Supported Platforms. (line   6)
+* Configuration files for running the software: Config Commands.
+                                                              (line   6)
+* Configuration options:                 The Configure script and its options.
+                                                              (line   6)
+* Configuring Quagga:                    Linux notes.         (line   6)
+* Contact information:                   Mailing List.        (line   6)
+* Distance-vector routing protocol:      OSPF Fundamentals.   (line   6)
+* Distribution configuration:            The Configure script and its options.
+                                                              (line   6)
+* Errors in the software:                Bug Reports.         (line   6)
+* Files for running configurations:      Config Commands.     (line   6)
+* Found a bug?:                          Bug Reports.         (line   6)
+* Getting the herd running:              Config Commands.     (line   6)
+* How to get in touch with Quagga:       Mailing List.        (line   6)
+* How to install Quagga:                 Installation.        (line   6)
+* Installation:                          Installation.        (line   6)
+* Installing Quagga:                     Installation.        (line   6)
+* ISIS:                                  OSPF6 Configuration Examples.
+                                                              (line  17)
+* Link State Advertisement:              OSPF Fundamentals.   (line  12)
+* Link State Announcement:               OSPF Fundamentals.   (line  12)
+* Link State DataBase:                   OSPF Fundamentals.   (line  12)
+* Link-state routing protocol:           OSPF Fundamentals.   (line   6)
+* Link-state routing protocol advantages: OSPF Fundamentals.  (line  22)
+* Link-state routing protocol disadvantages: OSPF Fundamentals.
+                                                              (line  32)
+* Linux configurations:                  Linux notes.         (line   6)
+* LSA flooding:                          OSPF Fundamentals.   (line  12)
+* Mailing lists:                         Mailing List.        (line   6)
+* Mailing Quagga:                        Mailing List.        (line   6)
+* Making Quagga:                         Installation.        (line   6)
+* Modifying the herd's behavior:         Config Commands.     (line   6)
+* Operating systems that support Quagga: Supported Platforms. (line   6)
+* Options for configuring:               The Configure script and its options.
+                                                              (line   6)
+* Options to ./configure:                The Configure script and its options.
+                                                              (line   6)
+* OSPF Areas overview:                   OSPF Fundamentals.   (line 106)
+* OSPF Fundamentals:                     OSPFv2.              (line  28)
+* OSPF Hello Protocol:                   OSPF Fundamentals.   (line  54)
+* OSPF Hello Protocol overview:          OSPF Fundamentals.   (line  53)
+* OSPF LSA overview:                     OSPF Fundamentals.   (line  75)
+* OSPFv2:                                ripngd Filtering Commands.
+                                                              (line  14)
+* Overview:                              Overview.            (line   6)
+* Quagga Least-Privileges:               Least-Privilege support.
+                                                              (line   6)
+* Quagga on other systems:               Supported Platforms. (line   6)
+* Quagga Privileges:                     Least-Privilege support.
+                                                              (line   6)
+* Reporting bugs:                        Bug Reports.         (line   6)
+* Reporting software errors:             Bug Reports.         (line   6)
+* Software architecture:                 System Architecture. (line   6)
+* Software internals:                    System Architecture. (line   6)
+* Supported platforms:                   Supported Platforms. (line   6)
+* System architecture:                   System Architecture. (line   6)
+
+
