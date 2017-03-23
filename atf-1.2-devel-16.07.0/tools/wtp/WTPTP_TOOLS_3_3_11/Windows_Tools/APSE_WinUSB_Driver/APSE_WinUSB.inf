@@ -1,0 +1,306 @@
+;
+; Copyright (c) Marvell International Ltd.
+
+[Version]
+Signature = "$Windows NT$"
+;Signature = "$Chicago$
+Class = APSE_WinUSB
+ClassGUID={36FC9E60-C465-11CF-8056-444553540000} ;wtptp.sys
+Provider = %ProviderName%
+CatalogFile=APSE_WinUSB.cat
+DriverVer=09/29/2014,3.3.11.2
+
+; ================== Class section ==================
+
+[ClassInstall32]
+Addreg=APSE_WinUSB_ClassReg
+
+[APSE_WinUSB_ClassReg]
+HKR,,,0,%ClassName%
+HKR,,Icon,,-1
+
+; ========== Manufacturer/Models sections ===========
+
+[Manufacturer]
+%ProviderName% = MARVELL_WinUSB,NTx86,NTamd64,NTia64
+
+[MARVELL_WinUSB.NTx86]
+%USB\VID_8086&PID_e001.DeviceDesc%=USB_Install, USB\VID_8086&PID_e001
+%USB\VID_8086&PID_c001.DeviceDesc%=USB_Install, USB\VID_8086&PID_c001
+%USB\VID_8086&PID_d001.DeviceDesc%=USB_Install, USB\VID_8086&PID_d001
+%USB\VID_1286&PID_8100.DeviceDesc%=USB_Install, USB\VID_1286&PID_8100
+%USB\VID_1286&PID_8101.DeviceDesc%=USB_Install, USB\VID_1286&PID_8101
+%USB\VID_1286&PID_8102.DeviceDesc%=USB_Install, USB\VID_1286&PID_8102
+%USB\VID_1286&PID_8103.DeviceDesc%=USB_Install, USB\VID_1286&PID_8103
+%USB\VID_1286&PID_8104.DeviceDesc%=USB_Install, USB\VID_1286&PID_8104
+%USB\VID_1286&PID_8105.DeviceDesc%=USB_Install, USB\VID_1286&PID_8105
+%USB\VID_1286&PID_8106.DeviceDesc%=USB_Install, USB\VID_1286&PID_8106
+%USB\VID_1286&PID_8111.DeviceDesc%=USB_Install, USB\VID_1286&PID_8111
+%USB\VID_1286&PID_8112.DeviceDesc%=USB_Install, USB\VID_1286&PID_8112
+%USB\VID_1286&PID_8113.DeviceDesc%=USB_Install, USB\VID_1286&PID_8113
+%USB\VID_1286&PID_8114.DeviceDesc%=USB_Install, USB\VID_1286&PID_8114
+%USB\VID_1286&PID_8115.DeviceDesc%=USB_Install, USB\VID_1286&PID_8115
+%USB\VID_1286&PID_8116.DeviceDesc%=USB_Install, USB\VID_1286&PID_8116
+%USB\VID_1286&PID_8117.DeviceDesc%=USB_Install, USB\VID_1286&PID_8117
+%USB\VID_1286&PID_8118.DeviceDesc%=USB_Install, USB\VID_1286&PID_8118
+%USB\VID_1286&PID_8128.DeviceDesc%=USB_Install, USB\VID_1286&PID_8128
+%USB\VID_1286&PID_8129.DeviceDesc%=USB_Install, USB\VID_1286&PID_8129
+%USB\VID_1286&PID_812A.DeviceDesc%=USB_Install, USB\VID_1286&PID_812A
+%USB\VID_1286&PID_8130.DeviceDesc%=USB_Install, USB\VID_1286&PID_8130
+%USB\VID_1286&PID_8163.DeviceDesc%=USB_Install, USB\VID_1286&PID_8163
+%USB\VID_1286&PID_8164.DeviceDesc%=USB_Install, USB\VID_1286&PID_8164
+%USB\VID_1286&PID_8165.DeviceDesc%=USB_Install, USB\VID_1286&PID_8165
+;%USB\VID_1286&PID_8166.DeviceDesc%=USB_Install, USB\VID_1286&PID_8166
+%USB\VID_1286&PID_8167.DeviceDesc%=USB_Install, USB\VID_1286&PID_8167
+%USB\VID_1286&PID_8168.DeviceDesc%=USB_Install, USB\VID_1286&PID_8168
+;%USB\VID_1286&PID_8169.DeviceDesc%=USB_Install, USB\VID_1286&PID_8169
+%USB\VID_1286&PID_8170.DeviceDesc%=USB_Install, USB\VID_1286&PID_8170
+%USB\VID_1286&PID_8171.DeviceDesc%=USB_Install, USB\VID_1286&PID_8171
+%USB\VID_1286&PID_8174.DeviceDesc%=USB_Install, USB\VID_1286&PID_8174
+%USB\VID_1286&PID_8175.DeviceDesc%=USB_Install, USB\VID_1286&PID_8175
+%USB\VID_1286&PID_8181.DeviceDesc%=USB_Install, USB\VID_1286&PID_8181
+%USB\VID_1286&PID_8182.DeviceDesc%=USB_Install, USB\VID_1286&PID_8182
+%USB\VID_1286&PID_8187.DeviceDesc%=USB_Install, USB\VID_1286&PID_8187
+%USB\VID_1286&PID_8189.DeviceDesc%=USB_Install, USB\VID_1286&PID_8189
+%USB\VID_1286&PID_818a.DeviceDesc%=USB_Install, USB\VID_1286&PID_818a
+%USB\VID_1286&PID_818b.DeviceDesc%=USB_Install, USB\VID_1286&PID_818b
+%USB\VID_1286&PID_818c.DeviceDesc%=USB_Install, USB\VID_1286&PID_818c
+%USB\VID_1299&PID_8199.DeviceDesc%=USB_Install, USB\VID_1299&PID_8199
+
+
+[MARVELL_WinUSB.NTamd64]
+%USB\VID_8086&PID_e001.DeviceDesc%=USB_Install, USB\VID_8086&PID_e001
+%USB\VID_8086&PID_c001.DeviceDesc%=USB_Install, USB\VID_8086&PID_c001
+%USB\VID_8086&PID_d001.DeviceDesc%=USB_Install, USB\VID_8086&PID_d001
+%USB\VID_1286&PID_8100.DeviceDesc%=USB_Install, USB\VID_1286&PID_8100
+%USB\VID_1286&PID_8101.DeviceDesc%=USB_Install, USB\VID_1286&PID_8101
+%USB\VID_1286&PID_8102.DeviceDesc%=USB_Install, USB\VID_1286&PID_8102
+%USB\VID_1286&PID_8103.DeviceDesc%=USB_Install, USB\VID_1286&PID_8103
+%USB\VID_1286&PID_8104.DeviceDesc%=USB_Install, USB\VID_1286&PID_8104
+%USB\VID_1286&PID_8105.DeviceDesc%=USB_Install, USB\VID_1286&PID_8105
+%USB\VID_1286&PID_8106.DeviceDesc%=USB_Install, USB\VID_1286&PID_8106
+%USB\VID_1286&PID_8111.DeviceDesc%=USB_Install, USB\VID_1286&PID_8111
+%USB\VID_1286&PID_8112.DeviceDesc%=USB_Install, USB\VID_1286&PID_8112
+%USB\VID_1286&PID_8113.DeviceDesc%=USB_Install, USB\VID_1286&PID_8113
+%USB\VID_1286&PID_8114.DeviceDesc%=USB_Install, USB\VID_1286&PID_8114
+%USB\VID_1286&PID_8115.DeviceDesc%=USB_Install, USB\VID_1286&PID_8115
+%USB\VID_1286&PID_8116.DeviceDesc%=USB_Install, USB\VID_1286&PID_8116
+%USB\VID_1286&PID_8117.DeviceDesc%=USB_Install, USB\VID_1286&PID_8117
+%USB\VID_1286&PID_8118.DeviceDesc%=USB_Install, USB\VID_1286&PID_8118
+%USB\VID_1286&PID_8128.DeviceDesc%=USB_Install, USB\VID_1286&PID_8128
+%USB\VID_1286&PID_8129.DeviceDesc%=USB_Install, USB\VID_1286&PID_8129
+%USB\VID_1286&PID_812A.DeviceDesc%=USB_Install, USB\VID_1286&PID_812A
+%USB\VID_1286&PID_8130.DeviceDesc%=USB_Install, USB\VID_1286&PID_8130
+%USB\VID_1286&PID_8163.DeviceDesc%=USB_Install, USB\VID_1286&PID_8163
+%USB\VID_1286&PID_8164.DeviceDesc%=USB_Install, USB\VID_1286&PID_8164
+%USB\VID_1286&PID_8165.DeviceDesc%=USB_Install, USB\VID_1286&PID_8165
+;%USB\VID_1286&PID_8166.DeviceDesc%=USB_Install, USB\VID_1286&PID_8166
+%USB\VID_1286&PID_8167.DeviceDesc%=USB_Install, USB\VID_1286&PID_8167
+%USB\VID_1286&PID_8168.DeviceDesc%=USB_Install, USB\VID_1286&PID_8168
+;%USB\VID_1286&PID_8169.DeviceDesc%=USB_Install, USB\VID_1286&PID_8169
+%USB\VID_1286&PID_8170.DeviceDesc%=USB_Install, USB\VID_1286&PID_8170
+%USB\VID_1286&PID_8171.DeviceDesc%=USB_Install, USB\VID_1286&PID_8171
+%USB\VID_1286&PID_8174.DeviceDesc%=USB_Install, USB\VID_1286&PID_8174
+%USB\VID_1286&PID_8175.DeviceDesc%=USB_Install, USB\VID_1286&PID_8175
+%USB\VID_1286&PID_8181.DeviceDesc%=USB_Install, USB\VID_1286&PID_8181
+%USB\VID_1286&PID_8182.DeviceDesc%=USB_Install, USB\VID_1286&PID_8182
+%USB\VID_1286&PID_8187.DeviceDesc%=USB_Install, USB\VID_1286&PID_8187
+%USB\VID_1286&PID_8189.DeviceDesc%=USB_Install, USB\VID_1286&PID_8189
+%USB\VID_1286&PID_818a.DeviceDesc%=USB_Install, USB\VID_1286&PID_818a
+%USB\VID_1286&PID_818b.DeviceDesc%=USB_Install, USB\VID_1286&PID_818b
+%USB\VID_1286&PID_818c.DeviceDesc%=USB_Install, USB\VID_1286&PID_818c
+%USB\VID_1299&PID_8199.DeviceDesc%=USB_Install, USB\VID_1299&PID_8199
+
+[MARVELL_WinUSB.NTia64]
+%USB\VID_8086&PID_e001.DeviceDesc%=USB_Install, USB\VID_8086&PID_e001
+%USB\VID_8086&PID_c001.DeviceDesc%=USB_Install, USB\VID_8086&PID_c001
+%USB\VID_8086&PID_d001.DeviceDesc%=USB_Install, USB\VID_8086&PID_d001
+%USB\VID_1286&PID_8100.DeviceDesc%=USB_Install, USB\VID_1286&PID_8100
+%USB\VID_1286&PID_8101.DeviceDesc%=USB_Install, USB\VID_1286&PID_8101
+%USB\VID_1286&PID_8102.DeviceDesc%=USB_Install, USB\VID_1286&PID_8102
+%USB\VID_1286&PID_8103.DeviceDesc%=USB_Install, USB\VID_1286&PID_8103
+%USB\VID_1286&PID_8104.DeviceDesc%=USB_Install, USB\VID_1286&PID_8104
+%USB\VID_1286&PID_8105.DeviceDesc%=USB_Install, USB\VID_1286&PID_8105
+%USB\VID_1286&PID_8106.DeviceDesc%=USB_Install, USB\VID_1286&PID_8106
+%USB\VID_1286&PID_8111.DeviceDesc%=USB_Install, USB\VID_1286&PID_8111
+%USB\VID_1286&PID_8112.DeviceDesc%=USB_Install, USB\VID_1286&PID_8112
+%USB\VID_1286&PID_8113.DeviceDesc%=USB_Install, USB\VID_1286&PID_8113
+%USB\VID_1286&PID_8114.DeviceDesc%=USB_Install, USB\VID_1286&PID_8114
+%USB\VID_1286&PID_8115.DeviceDesc%=USB_Install, USB\VID_1286&PID_8115
+%USB\VID_1286&PID_8116.DeviceDesc%=USB_Install, USB\VID_1286&PID_8116
+%USB\VID_1286&PID_8117.DeviceDesc%=USB_Install, USB\VID_1286&PID_8117
+%USB\VID_1286&PID_8118.DeviceDesc%=USB_Install, USB\VID_1286&PID_8118
+%USB\VID_1286&PID_8128.DeviceDesc%=USB_Install, USB\VID_1286&PID_8128
+%USB\VID_1286&PID_8129.DeviceDesc%=USB_Install, USB\VID_1286&PID_8129
+%USB\VID_1286&PID_812a.DeviceDesc%=USB_Install, USB\VID_1286&PID_812a
+%USB\VID_1286&PID_8130.DeviceDesc%=USB_Install, USB\VID_1286&PID_8130
+%USB\VID_1286&PID_8163.DeviceDesc%=USB_Install, USB\VID_1286&PID_8163
+%USB\VID_1286&PID_8164.DeviceDesc%=USB_Install, USB\VID_1286&PID_8164
+%USB\VID_1286&PID_8165.DeviceDesc%=USB_Install, USB\VID_1286&PID_8165
+;%USB\VID_1286&PID_8166.DeviceDesc%=USB_Install, USB\VID_1286&PID_8166
+%USB\VID_1286&PID_8167.DeviceDesc%=USB_Install, USB\VID_1286&PID_8167
+%USB\VID_1286&PID_8168.DeviceDesc%=USB_Install, USB\VID_1286&PID_8168
+;%USB\VID_1286&PID_8169.DeviceDesc%=USB_Install, USB\VID_1286&PID_8169
+%USB\VID_1286&PID_8170.DeviceDesc%=USB_Install, USB\VID_1286&PID_8170
+%USB\VID_1286&PID_8171.DeviceDesc%=USB_Install, USB\VID_1286&PID_8171
+%USB\VID_1286&PID_8174.DeviceDesc%=USB_Install, USB\VID_1286&PID_8174
+%USB\VID_1286&PID_8175.DeviceDesc%=USB_Install, USB\VID_1286&PID_8175
+%USB\VID_1286&PID_8181.DeviceDesc%=USB_Install, USB\VID_1286&PID_8181
+%USB\VID_1286&PID_8182.DeviceDesc%=USB_Install, USB\VID_1286&PID_8182
+%USB\VID_1286&PID_8187.DeviceDesc%=USB_Install, USB\VID_1286&PID_8187
+%USB\VID_1286&PID_8189.DeviceDesc%=USB_Install, USB\VID_1286&PID_8189
+%USB\VID_1286&PID_818a.DeviceDesc%=USB_Install, USB\VID_1286&PID_818a
+%USB\VID_1286&PID_818b.DeviceDesc%=USB_Install, USB\VID_1286&PID_818b
+%USB\VID_1286&PID_818c.DeviceDesc%=USB_Install, USB\VID_1286&PID_818c
+%USB\VID_1299&PID_8199.DeviceDesc%=USB_Install, USB\VID_1299&PID_8199
+
+; =================== Installation ===================
+
+;[1]
+[USB_Install]
+Include=Winusb.inf
+Needs=WINUSB.NT
+
+;[2]
+[USB_Install.Services]
+Include=winusb.inf
+Needs=WINUSB.NT.Services
+AddService=WinUSB,0x00000002,WinUSB_ServiceInstall
+
+[WinUSB_ServiceInstall]
+DisplayName     = %WinUSB_SvcDesc%
+ServiceType     = 1
+StartType       = 3
+ErrorControl    = 1
+ServiceBinary   = %12%\WinUSB.sys;
+
+;[3]
+[USB_Install.Wdf]
+KmdfService=WINUSB, WinUSB_Install
+UmdfDispatcher=WinUsb
+UmdfServiceOrder=WINUSB
+
+
+[WinUSB_Install]
+KmdfLibraryVersion=1.9
+
+;[4]
+[USB_Install.HW]
+AddReg=Dev_AddReg
+
+[Dev_AddReg]
+HKR,,DeviceInterfaceGUIDs,0x10000,"{D696BFEB-1734-417d-8A04-86D01071C512}"
+;HKR,,DeviceInterfaceGUIDs,0x10000,"{36FC9E60-C465-11CF-8056-444553540000}"
+;HKR,,DeviceInterfaceGUIDs,0x10000,"{6F40032F-99BE-47C0-B19C-BDB4BF322F49}"
+
+;[5]
+[USB_Install.CoInstallers]
+AddReg=CoInstallers_AddReg
+CopyFiles=CoInstallers_CopyFiles
+
+[CoInstallers_AddReg]
+;HKR,,CoInstallers32,0x00010000,"WdfCoInstaller01009.dll,WdfCoInstaller","WinUSBCoInstaller2.dll"
+;HKR,,CoInstallers32,0x00010000,"WudfUpdate_01009.dll,"WinUSBCoInstaller2","WdfCoInstaller01009.dll,WdfCoInstaller"
+HKR,,CoInstallers32,0x00010000,"WinUSBCoInstaller2.dll","WUDFUpdate_01009.dll","WdfCoInstaller01009.dll,WdfCoInstaller"
+
+[CoInstallers_CopyFiles]
+WinUSBCoInstaller2.dll
+WdfCoInstaller01009.dll
+WUDFUpdate_01009.dll
+
+[DestinationDirs]
+CoInstallers_CopyFiles=11
+
+
+; ================= Source Media Section =====================
+;[7]
+;[SourceDisksNames]
+;1 = %DISK_NAME%,,,\x86
+;2 = %DISK_NAME%,,,\amd64
+;3 = %DISK_NAME%,,,\ia64
+
+[SourceDisksNames.x86]
+1 = %DISK_NAME%,,,\x86
+
+[SourceDisksNames.amd64]
+2 = %DISK_NAME%,,,\amd64
+
+[SourceDisksNames.ia64]
+3 = %DISK_NAME%,,,\ia64
+
+[SourceDisksFiles.x86]
+WinUSBCoInstaller2.dll=1
+WdfCoInstaller01009.dll=1
+WUDFUpdate_01009.dll=1
+
+[SourceDisksFiles.amd64]
+WinUSBCoInstaller2.dll=2
+WdfCoInstaller01009.dll=2
+WUDFUpdate_01009.dll=2
+
+[SourceDisksFiles.ia64]
+WinUSBCoInstaller2.dll=3
+WdfCoInstaller01009.dll=3
+WUDFUpdate_01009.dll=3
+
+; Copy Files section
+;------------------------------------------------------------------------------
+[_CopyFiles_sys]
+winusb.sys
+
+;************************************************* *****************************
+; Destination Directories
+;------------------------------------------------------------------------------
+[DestinationDirs]
+DefaultDestDir = 12 ; %SystemRoot%\system32\drivers
+_CopyFiles_sys = 12
+
+; =================== Strings ===================
+
+[Strings]
+ProviderName="APSE_WinUSB_Release"
+USB\VID_8086&PID_e001.DeviceDesc="Marvell(R) WTP: Tools package USB Driver for Monahans P"
+USB\VID_8086&PID_c001.DeviceDesc="Marvell(R) WTP: Tools package USB Driver for Monahans L"
+USB\VID_8086&PID_d001.DeviceDesc="Marvell(R) WTP: Tools package USB Driver for Tavor"
+USB\VID_1286&PID_8100.DeviceDesc="Marvell(R) WTP: Tools package USB Driver for Monahans P"
+USB\VID_1286&PID_8101.DeviceDesc="Marvell(R) WTP: Tools package USB Driver for Monahans L"
+USB\VID_1286&PID_8102.DeviceDesc="Marvell(R) WTP: Tools package USB Driver for Monahans LV"
+USB\VID_1286&PID_8103.DeviceDesc="Marvell(R) WTP: Tools package USB Driver for Tavor P (PXA920)"
+USB\VID_1286&PID_8104.DeviceDesc="Marvell(R) WTP: Tools package USB Driver for Tavor PV/PV2 (PXA940/PXA950)"
+USB\VID_1286&PID_8105.DeviceDesc="Marvell(R) WTP: Tools package USB Driver for Tavor L (TTC)"
+USB\VID_1286&PID_8106.DeviceDesc="Marvell(R) WTP: Tools package USB Driver for PXA168 (Armada 16x)"
+USB\VID_1286&PID_8111.DeviceDesc="Marvell(R) WTP: Tools package USB Driver for PXA920 (Tavor TD)"
+USB\VID_1286&PID_8112.DeviceDesc="Marvell(R) WTP: Tools package USB Driver for MMP2 (Armada 610)"
+USB\VID_1286&PID_8113.DeviceDesc="Marvell(R) WTP: Tools package USB Driver for 88AP001"
+USB\VID_1286&PID_8114.DeviceDesc="Marvell(R) WTP: Tools package USB Driver for MG1 (PXA955)"
+USB\VID_1286&PID_8115.DeviceDesc="Marvell(R) WTP: Tools package USB Driver for Tavor PV2-MG2 (88CP958)"
+USB\VID_1286&PID_8116.DeviceDesc="Marvell(R) WTP: Tools package USB Driver for Eshel (PXA1701)"
+USB\VID_1286&PID_8117.DeviceDesc="Marvell(R) WTP: Tools package USB Driver for Nevo (PXA978)"
+USB\VID_1286&PID_8118.DeviceDesc="Marvell(R) WTP: Tools package USB Driver for MMP3 (PXA2128)"
+USB\VID_1286&PID_8128.DeviceDesc="Marvell(R) WTP: Tools package USB Driver for Eshel2 (PXA1801)"
+USB\VID_1286&PID_8129.DeviceDesc="Marvell(R) WTP: Tools package USB Driver for MMP2X (Armada 622)"
+USB\VID_1286&PID_812A.DeviceDesc="Marvell(R) WTP: Tools package USB Driver for Wukong (PXA1202)/ Wujin (PXA1206)"
+USB\VID_1286&PID_8130.DeviceDesc="Marvell(R) WTP: Tools package USB Driver for Nezha (PXA1802)"
+USB\VID_1286&PID_8163.DeviceDesc="Marvell(R) WTP: Tools package USB Driver for Granite2/Gemstone2/Basalt2 (88PA62-70/88PA62-20/88PA62-10)"
+USB\VID_1286&PID_8164.DeviceDesc="Marvell(R) WTP: Tools package USB Driver for EMEI (PXA928)/KUNLUN(PXA986)/WUTAI(PXA888)"
+USB\VID_1286&PID_8165.DeviceDesc="Marvell(R) WTP: Tools package USB Driver for EDEN (PXA1928)"
+;USB\VID_1286&PID_8166.DeviceDesc="Marvell(R) WTP: Tools package USB Driver for UNASSIGNED"
+USB\VID_1286&PID_8167.DeviceDesc="Marvell(R) WTP: Tools package USB Driver for Kunlun2" 
+USB\VID_1286&PID_8168.DeviceDesc="Marvell(R) WTP: Tools package USB Driver for Adir (PXA1986)"
+;USB\VID_1286&PID_8169.DeviceDesc="Marvell(R) WTP: Tools package USB Driver for UNASSIGNED
+USB\VID_1286&PID_8170.DeviceDesc="Marvell(R) WTP: Tools package USB Driver for Helan (PXA1088) / Helan LTE (PXA1920)"
+USB\VID_1286&PID_8171.DeviceDesc="Marvell(R) WTP: Tools package USB Driver for Eshel3 (PXA1812)"
+USB\VID_1286&PID_8174.DeviceDesc="Marvell(R) WTP: Tools package USB Driver for Nezha2 (PXA1822)"
+USB\VID_1286&PID_8175.DeviceDesc="Marvell(R) WTP: Tools package USB Driver for Helan2/3 (PXA1U88/PXA1936)"
+USB\VID_1286&PID_8181.DeviceDesc="Marvell(R) WTP: Tools package USB Driver for Nezha3 (PXA1826)"
+USB\VID_1286&PID_8182.DeviceDesc="Marvell(R) WTP: Tools package USB Driver for ULC1 (PXA1908)"
+USB\VID_1286&PID_8187.DeviceDesc="Marvell(R) WTP: Tools package USB Driver for Basalt"
+USB\VID_1286&PID_8189.DeviceDesc="Marvell(R) WTP: Tools package USB Driver for Helan4 (PXA1956)"
+USB\VID_1286&PID_818a.DeviceDesc="Marvell(R) WTP: Tools package USB Driver for Vega"
+USB\VID_1286&PID_818b.DeviceDesc="Marvell(R) WTP: Tools package USB Driver for Bowie"
+USB\VID_1286&PID_818c.DeviceDesc="Marvell(R) WTP: Tools package USB Driver for ULC2"
+USB\VID_1299&PID_8199.DeviceDesc="Marvell(R) WTP: Tools package USB Driver for MMP3 (PXA2128) QA_EVAL_VID_PID"
+
+APSE_WinUSB_SvcDesc="Marvell(R) APSE_WinUSB: USB Host Driver"
+DISK_NAME="InstallDisk"
+ClassName="APSE_WinUSB_Class"

@@ -1,0 +1,40 @@
+ATF Porting:
+------------
+
+This document describes how to port ATF to a customer board, assuming that the SoC being used is already supported
+in ATF.
+
+
+Source code structure
+---------------------
+
+- The cusomer platform specific code will reside under plat/marvell/<soc family>/<soc>_cust.
+  e.g. plat/marvell/a8k/a7040_cust
+- The platform name for build purposes is called <soc>_cust (e.g. a7040_cust).
+- The build system will reuse all files from within the soc directory, and take only the porting
+  files from the customer platform directory.
+
+
+Porting:
+--------
+All files that require porting are located under the plat/marvell/<soc family>/<soc>_cust directory.
+
+Common to all SoC's
+  o DDR Porting (dram_porting.c):
+	- This file defines the dram topology on the customer's board.
+	- <TODO> Need to add detailed description of the porting fields.
+
+A7K/A8K specific
+  o SoC Physical Address Map (soc_phys_map_config.c):
+	- This file describes the SoC physical memory mapping to be used for the CCU, RFU, AXI-MBUS and IOB
+	  address decode units (Refer to the functional spec for more details).
+	- In most cases, using the default address decode windows should work OK.
+	- In cases where a special physical address map is needed (e.g. Special size for PCIe MEM windows,
+	  large memory mapped SPI flash...), then porting of the SoC memory map is required.
+	  Note: For a detailed information on how CCU, RFU, AXI-MBUS & IOB work, please refer to the SoC functional spec,
+	  and under doc/marvell/misc/mvebu-[ccu/iob/amb/rfu].txt files.
+
+Build Instructions:
+------------------
+Refer to the build instructions under docs/marvell/build.txt
+

@@ -1,0 +1,178 @@
+ --------------------------------------------------------------------------------
+
+ Copyright(C) 2006-2010 Marvell International Ltd.  
+ All Rights Reserved  
+
+ --------------------------------------------------------------------------------
+ --------------------------------------------------------------------------------
+ 
+  INTEL CONFIDENTIAL
+ 
+  Copyright 2001-2006 Intel Corporation All Rights Reserved.
+ 
+  The source code contained or described herein and all documents related to
+  the source code ("Material") are owned by Intel Corporation or its 
+  suppliers or licensors. Title to the Material remains with Intel 
+  Corporation or its suppliers and licensors. The Material contains trade
+  secrets and proprietary and confidential information of Intel or its 
+  suppliers and licensors. The Material is protected by worldwide copyright 
+  and trade secret laws and treaty provisions. No part of the Material may be
+  used, copied, reproduced, modified, published, uploaded, posted, 
+  transmitted, distributed, or disclosed in any way without Intel's prior 
+  express written permission.
+ 
+  No license under any patent, copyright, trade secret or other intellectual 
+  property right is granted to or conferred upon you by disclosure or 
+  delivery of the Materials, either expressly, by implication, inducement, 
+  estoppel or otherwise. Any license under such intellectual property rights 
+  must be express and approved by Intel in writing.
+ 
+ 
+ --------------------------------------------------------------------------------
+ -------------------------------------------------------------------------------- 
+ MARVELL INTERNATIONAL LTD., ON BEHALF OF ITSELF AND ITS WORLDWIDE 
+ AFFILIATES(COLLECTIVELY, "MARVELL"), MAKES NO WARRANTY OF ANY KIND WITH 
+ REGARD TO THIS MATERIAL, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES 
+ OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. 
+ MARVELL ASSUMES NO RESPONSIBILITY FOR ANY ERRORS THAT MAY 
+ APPEAR IN THIS DOCUMENT. MARVELL MAKES NO COMMITMENT TO 
+ UPDATE NOR TO KEEP CURRENT THE INFORMATION CONTAINED IN THIS DOCUMENT.
+ -------------------------------------------------------------------------------
+
+[Output Entry]
+numberCpus=9
+numberSwitches=5
+numberOutputs=1
+Scanattr=512
+
+[Core 0]
+# PJ4 core , ID=0
+Type=5
+IRLength=5
+BypassCmd=32
+BypassLen=1
+destID=Switch 0
+
+[Core 1]
+# faked Dummy core , before PJ4 , ID=1
+Type=5
+IRLength=6
+BypassCmd=64
+BypassLen=1
+destID=Switch 0
+
+[Core 2]
+# first Dummy core , before PJ4 , ID=2
+Type=5
+IRLength=1
+BypassCmd=1
+BypassLen=1
+destID=Switch 2
+
+[Core 3]
+# MSA , ID=3
+Type=7
+IRLength=11
+BypassCmd=2047
+BypassLen=1
+destID=Switch 1
+
+[Core 4]
+# second Dummy core , after PJ4 , ID=4
+Type=5
+IRLength=0
+BypassCmd=0
+BypassLen=1
+destID=Switch 2
+
+[Core 5]
+# third Dummy core , after PJ4/MSA , before ARM , ID=5
+Type=3
+IRLength=1
+BypassCmd=1
+BypassLen=1
+destID=Switch 3
+
+[Core 6]
+# ARM9 core / ID=6
+Type=3
+IRLength=4
+BypassCmd=15
+BypassLen=1
+destID=Switch 3
+
+[Core 7]
+# ARM9 ETB ? ID=7
+Type=3
+IRLength=4
+BypassCmd=15
+BypassLen=1
+destID=Switch 3
+
+[Core 8]
+# Dummy core , after ETB , ID=8
+Type=3
+IRLength=2
+BypassCmd=3
+BypassLen=2
+destID=Switch 3
+
+[Switch 0]
+# DC switch for fake Dummy Core 1 and PJ4 , ID=9
+type=DC_FIX
+destID=Switch 1
+numberInputs=2
+Order0=Core 0  
+Order1=Core 1
+
+[Switch 1]
+# parallel switch for PJ4 & MSA , ID=10
+type=PAR
+destID=Switch 2
+initialinput=0
+numberInputs=2
+Order0=Core 3
+Order1=Switch 0
+
+[Switch 2]
+# DC switch for Dummy Core 1 and PJ4/MSA and Dummy Core 2, ID=11
+type=DC_FIX
+destID=Switch 4
+numberInputs=3
+Order0=Core 4
+Order1=Switch 1  
+Order2=Core 2
+
+[Switch 3]
+# DC switch for Dummy + ARM + ETB + Dummy  / ID=12
+type=DC_FIX
+destID=Switch 4 
+numberInputs=4
+Order0=Core 8  
+Order1=Core 7
+Order2=Core 6
+Order3=Core 5
+
+[Switch 4]
+# DC switch for switch 10 and switch 11 / ID=13
+type=DC_PREPEND
+destID=Output 0
+numberInputs=2
+Order0=Switch 3  
+Order1=Switch 2
+initialState=0
+numberOnCommands=1
+numberOffCommands=1
+IRLengthOn_0=12
+IRValueOn_0=$201
+DRLengthOn_0=18
+DRValueOn_0=$10000
+IRLengthOff_0=12
+IRValueOff_0=$201
+DRLengthOff_0=18
+DRValueOff_0=$00000
+
+[Output 0]
+# output , ID=14
+type=10
+input=Switch 4

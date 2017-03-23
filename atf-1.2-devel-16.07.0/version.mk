@@ -1,0 +1,1 @@
+BUILD_STRING = devel-16.07.0

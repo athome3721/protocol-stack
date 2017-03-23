@@ -1,0 +1,232 @@
+ --------------------------------------------------------------------------------
+
+ (C) Copyright 2006-2010 Marvell International Ltd.
+ All Rights Reserved
+
+ --------------------------------------------------------------------------------
+ --------------------------------------------------------------------------------
+
+  INTEL CONFIDENTIAL
+
+  Copyright 2001-2006 Intel Corporation All Rights Reserved.
+
+  The source code contained or described herein and all documents related to
+  the source code ("Material") are owned by Intel Corporation or its
+  suppliers or licensors. Title to the Material remains with Intel
+  Corporation or its suppliers and licensors. The Material contains trade
+  secrets and proprietary and confidential information of Intel or its
+  suppliers and licensors. The Material is protected by worldwide copyright
+  and trade secret laws and treaty provisions. No part of the Material may be
+  used, copied, reproduced, modified, published, uploaded, posted,
+  transmitted, distributed, or disclosed in any way without Intel's prior
+  express written permission.
+
+  No license under any patent, copyright, trade secret or other intellectual
+  property right is granted to or conferred upon you by disclosure or
+  delivery of the Materials, either expressly, by implication, inducement,
+  estoppel or otherwise. Any license under such intellectual property rights
+  must be express and approved by Intel in writing.
+
+
+ --------------------------------------------------------------------------------
+ --------------------------------------------------------------------------------
+ MARVELL INTERNATIONAL LTD., ON BEHALF OF ITSELF AND ITS WORLDWIDE
+ AFFILIATES(COLLECTIVELY, "MARVELL"), MAKES NO WARRANTY OF ANY KIND WITH
+ REGARD TO THIS MATERIAL, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ MARVELL ASSUMES NO RESPONSIBILITY FOR ANY ERRORS THAT MAY
+ APPEAR IN THIS DOCUMENT. MARVELL MAKES NO COMMITMENT TO
+ UPDATE NOR TO KEEP CURRENT THE INFORMATION CONTAINED IN THIS DOCUMENT.
+ -------------------------------------------------------------------------------
+# .--------------------.
+# | ID 0               |
+# | Core 0  PTAP       |                            
+# |                    |------------------------------------------------------------.
+# |                    |                                                            |
+# '--------------------'                                                            |
+#                                                                                   |
+#                                                                                   |
+# .--------------------.     .---------------.                                      |
+# | ID 1               |     | ID 8          |                                      |
+# | Core 1 - Cortex-A7 |     | Switch 0 - CS |                                      |
+# |                    | --> | Coresight     |-----.                                |
+# |                    |     | Cortex-A7     |     |   .--------------------.       |
+# '--------------------'     '---------------'     '-->| ID 11              |       |
+#                                                      | Switch 3 - DC      |       |
+# .--------------------.                          .--->| Daisychain - fixed |-----. |
+# | ID 2               |                          | .->| A7/Dragonite/Dummy |     | |
+# | Core 2 Dragonite   |--------------------------' |  '--------------------'     | |
+# |                    |                            |                             | |
+# |                    |                            |                             | |
+# '--------------------'                            |                             | |
+#                                                   |                             | |
+# .--------------------.                            |                             | |     
+# | ID 5               |                            |                             | | 
+# | Core 5 Dummy       |                            |                             | |
+# |                    |----------------------------'                             | |
+# | Additional bit     |                                                          | |
+# '--------------------'                                                          | |
+#                                                                                 | |
+#                                                                                 | |
+# .--------------------.                                                          | |      .------------------.     .----------.
+# | ID 3               |                                                          | '----->| ID 12            |     | ID 13    |
+# | Core 3 - Osprey    |                                                          '------->|                  |     |          |
+# |                    |---------------------------.                                       | Switch 4 - SEL   |---->| Output 0 |
+# |                    |                           |   .--------------------.     .------->|                  |     |          |
+# '--------------------'                           '-->| ID 9               |     | .----->| PTAP/CA9/OSP/MSA |     |          |
+#                                                      | Switch 1 - DC      |-----' |      '------------------'     '----------'
+# .--------------------.                               | Daisychain - fixed |       |
+# | ID 6               |                           .-->| Osprey/Dummy       |       |
+# | Core 6 Dummy       |---------------------------'   '--------------------'       |
+# |                    |                                                            |
+# | Additional bit     |                                                            |
+# '--------------------'                                                            |
+#                                                                                   |
+#                                                                                   |
+# .--------------------.                                                            |
+# | ID 4               |                                                            |
+# | Core 4 - MSA       |                                                            |
+# |                    |---------------------------.                                |
+# |                    |                           |   .--------------------.       |
+# '--------------------'                           '-->| ID 10               |       |
+#                                                      | Switch 2 - DC      |-------'
+# .--------------------.                               | Daisychain - fixed |
+# | ID 7               |                           .-->| MSA/Dummy          |
+# | Core 7 Dummy       |---------------------------'   '--------------------'
+# |                    |
+# | Additional bit     |
+# '--------------------'
+#
+#
+
+[Output Entry]
+numberCpus=8
+numberSwitches=5
+numberOutputs=1
+Scanattr=128
+
+[Core 0]
+# PTAP                  / ID=0
+IRLength=9
+BypassCmd=511
+BypassLen=1
+destID=Switch 4
+
+[Core 1]
+# Cortex-A7             / ID=1
+IRLength=4
+BypassCmd=15
+BypassLen=1
+destID=Switch 0
+
+[Core 2]
+# Dragonite            / ID=2
+IRLength=4
+BypassCmd=15
+BypassLen=1
+destID=Switch 3
+
+[Core 3]
+# Osprey core           / ID=3
+IRLength=4
+BypassCmd=15
+BypassLen=1
+destID=Switch 1
+
+[Core 4]
+# MSA core              / ID=4
+IRLength=11
+BypassCmd=2047
+BypassLen=1
+destID=Switch 2
+
+[Core 5]
+# Additional bit        / ID=5
+IRLength=1
+BypassCmd=1
+BypassLen=1
+destID=Switch 3
+
+[Core 6]
+# Additional bit        / ID=6
+IRLength=1
+BypassCmd=1
+BypassLen=1
+destID=Switch 1
+
+[Core 7]
+# Additional bit        / ID=7
+IRLength=1
+BypassCmd=1
+BypassLen=1
+destID=Switch 2
+
+[Switch 0]
+# Coresight for CA9     / ID=8
+type=CORESIGHT
+destID=Switch 3
+numberInputs=1
+Order0=Core 1
+
+[Switch 1]
+# DC switch for Seagull and dummy bit / ID=9
+type=DC_FIX
+destID=Switch 4
+numberInputs=2
+Order0=Core 6
+Order1=Core 3
+
+
+[Switch 2]
+# DC switch for MSA and dummy bit / ID=10
+type=DC_FIX
+destID=Switch 4
+numberInputs=2
+Order0=Core 7
+Order1=Core 4
+
+[Switch 3]
+# DC switch for CS/Dragonite and dummy bit / ID=11
+type=DC_FIX
+destID=Switch 4
+numberInputs=3
+Order0=Core 5
+Order1=Core 2
+Order2=Switch 0
+
+[Switch 4]
+# PTAP SEL Switch / ID=12
+type=SEL
+destID=Output 0
+initialinput=0
+numberInputs=4
+Order0=Core 0
+Order1=Switch 3
+Order2=Switch 1
+Order3=Switch 2
+
+initialState=0
+
+IRLengthSel_0=9
+IRValueSel_0=$98
+DRLengthSel_0=16
+DRValueSel_0=$0
+
+IRLengthSel_1=9
+IRValueSel_1=$98
+DRLengthSel_1=16
+DRValueSel_1=$A
+
+IRLengthSel_2=9
+IRValueSel_2=$98
+DRLengthSel_2=16
+DRValueSel_2=$6
+
+IRLengthSel_3=9
+IRValueSel_3=$98
+DRLengthSel_3=16
+DRValueSel_3=$12
+
+[Output 0]
+# / ID=13
+input=Switch 4

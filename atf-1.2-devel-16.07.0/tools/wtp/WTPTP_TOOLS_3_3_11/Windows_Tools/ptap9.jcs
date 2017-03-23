@@ -1,0 +1,14 @@
+[Output Entry]
+numberCpus=1
+numberSwitches=0
+numberOutputs=1
+Scanattr=0
+
+[Core 0]
+IRLength=9
+BypassCmd=511
+BypassLen=1
+destID=Output 0
+
+[Output 0]
+input=Core 0

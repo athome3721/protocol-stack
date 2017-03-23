@@ -1,0 +1,34 @@
+; Upload Spec File
+
+Upload Spec:
+Type: 0                     ; Flash
+Subtype: 11                 ; SDMMC_FLASH_OPT3_P
+Partition: 0                ; partition 0
+Offset: 0x10000             ; dump address
+Data Size: 0x1000           ; number of bytes to dump
+Output File: Upload1.bin    ; upload is saved to this file
+;Compare File: Comp1.bin     ; file must exist for comparsion feature
+Compare File: Upload1.bin     ; file must exist for comparsion feature
+End Upload Spec:
+
+Upload Spec:
+Type: 0                     ; Flash
+Subtype: 11                 ; SDMMC_FLASH_OPT3_P
+Partition: 0                ; partition 0
+Offset: 0x20000             ; dump address
+Data Size: 0x2000           ; number of bytes to dump
+Output File: Upload2.bin    ; upload is saved to this file
+Compare File: Comp2.bin     ; file must exist for comparsion feature
+End Upload Spec:
+
+Upload Spec:
+Type: 0                     ; Flash
+Subtype: 11                 ; SDMMC_FLASH_OPT3_P
+Partition: 0                ; partition 0
+Offset: 0x30000             ; dump address
+Data Size: 0x3000           ; number of bytes to dump
+Output File: Upload3.bin    ; upload is saved to this file
+Compare File: Comp3.bin     ; file must exist for comparsion feature
+End Upload Spec:
+
+

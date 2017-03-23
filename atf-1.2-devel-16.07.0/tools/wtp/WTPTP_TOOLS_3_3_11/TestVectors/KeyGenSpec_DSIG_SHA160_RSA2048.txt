@@ -1,0 +1,7 @@
+Seed: "MarvellEncryptionSeed"
+Key ID: "DSIG"
+Encrypt Algorithm ID: 3
+Hash Algorithm ID: 20
+Key Size: 2048
+Output Binary Filename: "..\temp\Generated_DSIG_Key_SHA160_RSA2048.bin"
+Output Text Filename: "..\temp\Generated_DSIG_Key_SHA160_RSA2048.txt"

@@ -1,0 +1,87 @@
+ --------------------------------------------------------------------------------
+
+ Copyright(C) 2006-2008 Marvell International Ltd.  
+ All Rights Reserved  
+
+ --------------------------------------------------------------------------------
+ --------------------------------------------------------------------------------
+ 
+  INTEL CONFIDENTIAL
+ 
+  Copyright 2001-2006 Intel Corporation All Rights Reserved.
+ 
+  The source code contained or described herein and all documents related to
+  the source code ("Material") are owned by Intel Corporation or its 
+  suppliers or licensors. Title to the Material remains with Intel 
+  Corporation or its suppliers and licensors. The Material contains trade
+  secrets and proprietary and confidential information of Intel or its 
+  suppliers and licensors. The Material is protected by worldwide copyright 
+  and trade secret laws and treaty provisions. No part of the Material may be
+  used, copied, reproduced, modified, published, uploaded, posted, 
+  transmitted, distributed, or disclosed in any way without Intel's prior 
+  express written permission.
+ 
+  No license under any patent, copyright, trade secret or other intellectual 
+  property right is granted to or conferred upon you by disclosure or 
+  delivery of the Materials, either expressly, by implication, inducement, 
+  estoppel or otherwise. Any license under such intellectual property rights 
+  must be express and approved by Intel in writing.
+ 
+ 
+ --------------------------------------------------------------------------------
+ -------------------------------------------------------------------------------- 
+ MARVELL INTERNATIONAL LTD., ON BEHALF OF ITSELF AND ITS WORLDWIDE 
+ AFFILIATES(COLLECTIVELY, "MARVELL"), MAKES NO WARRANTY OF ANY KIND WITH 
+ REGARD TO THIS MATERIAL, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES 
+ OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. 
+ MARVELL ASSUMES NO RESPONSIBILITY FOR ANY ERRORS THAT MAY 
+ APPEAR IN THIS DOCUMENT. MARVELL MAKES NO COMMITMENT TO 
+ UPDATE NOR TO KEEP CURRENT THE INFORMATION CONTAINED IN THIS DOCUMENT.
+ -------------------------------------------------------------------------------
+
+[Output Entry]
+numberCpus=4
+numberSwitches=1
+numberOutputs=1
+Scanattr=64
+
+[Core 0]
+Type=5
+IRLength=9
+BypassCmd=511
+BypassLen=1
+destID=4
+
+[Core 1]
+Type=5
+IRLength=4
+BypassCmd=15
+BypassLen=1
+destID=4
+
+[Core 2]
+Type=5
+IRLength=5
+BypassCmd=31
+BypassLen=1
+destID=4
+
+[Core 3]
+Type=3
+IRLength=4
+BypassCmd=15
+BypassLen=1
+destID=4
+
+[Switch 0]
+type=DC_FIX
+destID=5
+numberInputs=4
+Order0=3
+Order1=2
+Order2=1
+Order3=0
+
+[Output 0]
+type=10
+input=4

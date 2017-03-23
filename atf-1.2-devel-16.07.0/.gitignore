@@ -1,0 +1,23 @@
+# Ignore miscellaneous files
+cscope.*
+*.swp
+*.patch
+*.elf
+.project
+.cproject
+.hx
+tags
+
+# Ignore build directory
+build/
+
+# Ignore build products from tools
+tools/**/*.o
+tools/fip_create/fip_create
+tools/cert_create/src/*.o
+tools/cert_create/src/**/*.o
+tools/cert_create/cert_create
+tools/doimage/doimage
+
+# Ignore sub projects
+drivers/marvell/mv_ddr*

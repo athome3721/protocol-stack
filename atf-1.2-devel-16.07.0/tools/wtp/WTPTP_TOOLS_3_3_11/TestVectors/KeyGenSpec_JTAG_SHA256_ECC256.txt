@@ -1,0 +1,7 @@
+Seed: "MarvellEncryptionSeed1"
+Key ID: "JTAG"
+Encrypt Algorithm ID: 5
+Hash Algorithm ID: 32
+Key Size: 256
+Output Binary Filename: "C:\training\Generated_JTAG_Key_SHA256_ECC256_MBU.bin"
+Output Text Filename: "C:\training\Generated_JTAG_Key_SHA256_ECC256_MBU.txt"
