@@ -1,0 +1,21 @@
+Marvell CCU address decoding bindings
+=====================================
+
+The CCU node includes descriptions of the address decoding unit.
+It is used for u-boot 'map' command which displays the CCU window configuration.
+Note that the windows configuration is done in ATF package (see ATF porting guide under doc/marvell).
+
+Mandatory properties:
+SoC specific:
+	- compatible
+		should be "marvell,mvebu-ccu"
+	- reg: the base address of the CCU unit
+	- max-win: number of the max mbus windows
+
+
+Example:
+	map-ccu {
+		compatible = "marvell,mvebu-ccu";
+		reg = <0x0 0x50>;
+		max-win = <8>;
+	};

@@ -1,0 +1,20 @@
+Marvell RFU address decoding bindings
+=====================================
+
+The RFU node includes descriptions of the address decoding unit.
+It is used for u-boot 'map' command which displays the RFU window configuration.
+Note that the windows configuration is done in ATF package (see ATF porting guide under doc/marvell).
+
+Mandatory properties:
+SoC specific:
+	- compatible
+		should be "marvell,mvebu-rfu"
+	- reg: the base address of the RFU window
+	- max-win: number of the max mbus windows
+
+
+Example:
+	rfu {
+		compatible = "marvell,mvebu-rfu";
+		reg = <0x6f0000 0x50>;
+	};

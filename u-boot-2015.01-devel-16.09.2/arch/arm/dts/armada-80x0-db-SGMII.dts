@@ -1,0 +1,55 @@
+/*
+ * ***************************************************************************
+ * Copyright (C) 2015 Marvell International Ltd.
+ * ***************************************************************************
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 2 of the License, or any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * ***************************************************************************
+ */
+
+/dts-v1/;
+
+#include "armada-80x0-db.dtsi" /* include initial Board device tree */
+#include <dt-bindings/multi-fdt/a8k/multi-fdt.h>
+/ {
+	model = "DB-ARMADA-80x0 (SPI-SGMII)";
+	compatible = "marvell,armada-80x0-db", "marvell,armada-80x0";
+	fdt_config_id = <A80X0_SGMII>;
+	board_id = <A8K_8040_DB>;
+
+	cp110-master {
+		internal-regs {
+			comphy {
+				/* Serdes Configuration:
+					Lane 0: SGMII2
+					Lane 1: USB3_HOST0
+					Lane 2: SGMII
+					Lane 3: SATA1
+					Lane 4: USB3_HOST1
+					Lane 5: PEX2x1
+				*/
+
+				phy2 {
+					phy-type = <PHY_TYPE_SGMII0>;
+					phy-speed = <PHY_SPEED_1_25G>;
+				};
+
+			};
+			gop {
+				mac0 {
+					phy-mode = "sgmii"; /* lane-2 */
+					status = "okay";
+				};
+			};
+		};
+	};
+};

@@ -1,0 +1,21 @@
+Marvell Armada3700 UART bindings
+==============================
+
+UART driver for Marvell Armada3700 SoCs.
+
+Mandatory properties:
+SoC specific:
+	- compatible: Should be "marvell,armada-3700-uart".
+	- reg: The base address of the UART unit.
+	- clock_frequency: Input clock frequency of UART unit.
+Board specific:
+	- baudrate: The baudrate of the UART unit.
+
+Example for armadaLP UART-0 node:
+	serial: serial@12000 {
+		compatible = "marvell,armada-3700-uart";
+		reg = <0x12000 0x20>;
+		clock_frequency = <4800>;
+		baudrate = <115200>;
+		status = "okay";
+	};

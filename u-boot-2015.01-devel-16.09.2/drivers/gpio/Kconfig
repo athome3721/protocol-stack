@@ -1,0 +1,70 @@
+menu "GPIO Support"
+
+config DM_GPIO
+	bool "Enable Driver Model for GPIO drivers"
+	depends on DM
+	help
+	  If you want to use driver model for GPIO drivers, say Y.
+	  To use legacy GPIO drivers, say N.
+
+config MVEBU_PINCTL
+	bool "MVEBU Pin control support"
+	default n
+	help
+	  Choose this option to add support
+	  for pinctl driver. This drive implements
+	  the lowlevel control that allows changing
+	  the function of a multi purpose pin
+
+config MVEBU_A3700_PINCTL
+	bool "MVEBU Armada3700 Pin control support"
+	default n
+	help
+	  Choose this option to add support
+	  for Armada3700 pinctl driver. This drive implements
+	  the lowlevel control that allows changing
+	  the function of a multi purpose pin
+
+config MVEBU_GPIO
+	bool "MVEBU GPIO support"
+	select DM_GPIO
+	default n
+	help
+	  Choose this option to add
+	  support for mvebu GPIO.
+	  This drive implements the
+	  high level interfaces of GPIO.
+
+config MVEBU_MPP_BUS
+	bool "MPP bus support"
+	depends on (DEVEL_BOARD && (MVEBU_PINCTL || MVEBU_A3700_PINCTL))
+	default n
+	help
+	  Choose this option to add support
+	  for the mpp-bus driver. This driver
+	  is used for enabling or disabling mpp
+	  buses at runtime
+
+config DM_PCA953X
+	bool "PCA95[357]x, PCA9698, TCA64xx, and MAX7310 I/O ports"
+	depends on DM_GPIO
+	help
+	  Say yes here to provide access to several register-oriented
+	  SMBus I/O expanders, made mostly by NXP or TI.  Compatible
+	  models include:
+
+	  4 bits:	pca9536, pca9537
+
+	  8 bits:	max7310, max7315, pca6107, pca9534, pca9538, pca9554,
+			pca9556, pca9557, pca9574, tca6408, xra1202
+
+	  16 bits:	max7312, max7313, pca9535, pca9539, pca9555, pca9575,
+			tca6416
+
+	  24 bits:	tca6424
+
+	  40 bits:	pca9505, pca9698
+
+	  Now, max 24 bits chips and PCA953X compatible chips are
+	  supported
+endmenu

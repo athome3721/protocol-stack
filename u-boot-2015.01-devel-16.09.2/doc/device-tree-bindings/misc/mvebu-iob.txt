@@ -1,0 +1,26 @@
+Marvell IOB address decoding bindings
+=====================================
+
+The IOB node includes descriptions of the address decoding unit.
+It is used for u-boot 'map' command which displays the IOB window configuration.
+Note that the windows configuration is done in ATF package (see ATF porting guide under doc/marvell).
+
+IOB supports up to n (in CP110 n=24) windows for external memory transaction.
+When a transaction passes through the IOB, its address is compared to each of
+the enabled windows. If there is a hit and it passes the security checks it is
+advanced to the target port.
+
+Mandatory properties:
+SoC specific:
+	- compatible
+		should be "marvell,mvebu-iob"
+	- reg: the base address of the IOB unit
+	- max-win: number of the max IOB windows
+
+
+Example:
+	map-iob {
+		compatible = "marvell,mvebu-iob";
+		reg = <0x190000 0x50>;
+		max-win = <24>;
+	};

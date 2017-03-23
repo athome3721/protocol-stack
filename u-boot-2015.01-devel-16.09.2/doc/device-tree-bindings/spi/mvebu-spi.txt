@@ -1,0 +1,35 @@
+Marvell SPI bindings
+====================
+
+Driver for SPI bus in Marvell's Armada-8K SoCs
+
+Mandatory properties:
+SoC specific:
+	- compatible
+		Should be "marvell,orion-spi".
+	- reg
+		Base address of SPI-0.
+	- clock
+		This property points to the used clock for the SPI interface.
+		In the following example the node points to the t-clock.
+Board specific:
+	- spi-max-frequency
+		This property is used to calculate the SPI max bus frequency.
+		The value is in Bytes.
+	- cpol-cpha-cs-bitmap
+		This property is bitmap that defines whether the SCK idles high for chip-select i by enabling bit i.
+		This one of SPI modes (to idle in high for, for exmaple in Network over SPI)
+	- status
+		Set if the SPI interface is enabled/disabled.
+
+Example: For SPI-0 node:
+	spi0: spi@10600 {
+		compatible = "marvell,orion-spi";
+		reg = <0x10600 0x50>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		spi-max-frequency = <20971520>;
+		clock = <&tclk>;
+		status = "okay";
+		cpol-cpha-cs-bitmap = <1>; /*bit i is set if the cs-i SCK idles high */
+	};

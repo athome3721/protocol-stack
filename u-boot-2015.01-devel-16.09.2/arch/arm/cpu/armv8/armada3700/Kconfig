@@ -1,0 +1,28 @@
+if TARGET_ARMADA_3700
+
+config SYS_CPU
+	string
+	default "armv8"
+
+config SYS_BOARD
+	string
+	default "armada3700"
+
+config SYS_VENDOR
+	string
+	default "mvebu"
+
+config SYS_SOC
+	string
+	default "armada3700"
+
+config SYS_CONFIG_NAME
+	string
+	default "armada3700"
+
+config ARMV8_PSCI
+	bool
+	default y
+
+
+endif

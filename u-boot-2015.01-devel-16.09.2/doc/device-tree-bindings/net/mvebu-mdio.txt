@@ -1,0 +1,21 @@
+Marvell MDIO bindings
+====================
+
+The MDIO driver implements the required APIs to access
+Ethernet PHYs/switches, using the SMI or XSMI protocols.
+
+Mandatory properties:
+SoC specific:
+	- compatible
+		should be "marvell,mvebu-mdio".
+	- reg_xsmi: the base address and size XSMI bus.
+	- reg_smi: the base address and size SMI bus.
+	- id: contoller id.
+
+Example for MDIO node:
+	mdio0@30000 {
+		compatible = "marvell,mvebu-mdio";
+		reg_xsmi = <0x30000 0x20>;
+		reg_smi = <0x2004 0x4>;
+		id = <0>;
+	};

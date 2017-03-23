@@ -1,0 +1,23 @@
+Marvell Armada-3700 SoC SATA PHY bindings
+=====================================
+
+The SATA PHY node includes a description of the SATA PHY unit. In Armada-3700 Z1,
+SATA PHY has a dedicated serdes lane. This dts node is only relevant to Z1 revision.
+The driver initializes the SATA PHY, according to the FDT blob configurations.
+
+Mandatory properties:
+	- compatible:
+		"marvell,armada-3700-sata-phy"
+
+Board specific:
+	Optional properties:
+		- phy-invert: Polarity invert (PHY_POLARITY_NO_INVERT/PHY_POLARITY_TXD_INVERT/
+			PHY_POLARITY_RXD_INVERT/PHY_POLARITY_ALL_INVERT), the possible bits are
+			under include/dt-bindings/comphy/comphy_data.h
+
+Example:
+sataphy {
+	compatible = "marvell,armada-3700-sata-phy";
+	phy-invert = <PHY_POLARITY_TXD_INVERT>;
+	status = "okay";
+};

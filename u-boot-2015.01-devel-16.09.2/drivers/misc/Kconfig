@@ -1,0 +1,115 @@
+menu "Misc drivers"
+
+config MVEBU_MBUS_SKIP_DRAM_WIN
+	bool "skip DRAM window configuration in MBUS driver"
+	depends on MVEBU_MBUS
+	default n
+	help
+	  Choose this option to skip DRAM window
+	  configuration in MBUS driver.
+	  For some Soc, DRAM MBUS window has to
+	  be at the beginning, and could not be
+	  configured by anyway (keep the default value).
+
+config MVEBU_PHY_INDIRECT
+	bool "Access to PHY indirect registers"
+	depends on TARGET_ARMADA_8K
+	default y
+	help
+	  Choose this option to add support
+	  for PHY indirect access.
+	  This driver initialize the IHB window.
+
+config MVEBU_IHB_INIT
+	bool "Initialize IHB configuration"
+	depends on TARGET_ARMADA_8K
+	default n
+	help
+	  Choose this option to add support
+	  for IHB phy configuration init
+	  enable this option when needed,
+	  if device is connected over IHB
+
+config MVEBU_CHIP_SAR
+	bool "Chip sample at reset support"
+	default y
+	help
+	  Enable support for chip level sample at reset
+	  retreval functions.
+	  These functions are used by various U-Boot drivers
+	  and subsystem to discover the SoC sample at reset
+	  configuration.
+
+config MVEBU_SPL_CHIP_SAR_DUMP
+	bool "Sample at reset dump (in SPL)"
+	depends on SPL && MVEBU_CHIP_SAR
+	default n
+	help
+	  To add this option you need to add it to the spl config
+	  Choose this option to dump sample at
+	  reset registers
+
+endmenu
+
+menu "Address Decoding"
+depends on MVEBU
+
+config MVEBU_CCU
+	bool "CCU address decoding driver"
+	default n
+	depends on !MVEBU_SPL_DDR_OVER_PCI_SUPPORT && TARGET_ARMADA_8K
+	help
+	  Choose this option to add support
+	  for CCU address decoding driver.
+	  This driver initialize the CCU windows
+	  only.
+
+config MVEBU_AMB_ADEC
+	bool "AXI MBUS address decoding driver"
+	default n
+	depends on TARGET_ARMADA_8K
+	help
+	  Choose this option to add support
+	  for AXI MBUS address decoding driver.
+	  This driver initialize the IOB windows
+	  only.
+
+config MVEBU_IOB
+	bool "IOB address decoding driver"
+	default n
+	depends on TARGET_ARMADA_8K
+	help
+	  Choose this option to add support
+	  for IOB address decoding driver.
+	  This driver initialize the IOB windows
+	  only.
+
+config MVEBU_RFU
+	bool "RFU address decoding driver"
+	default n
+	depends on !MVEBU_SPL_DDR_OVER_PCI_SUPPORT && TARGET_ARMADA_8K
+	help
+	  Choose this option to add support
+	  for RFU address decoding driver.
+	  This driver initialize the RFU windows
+	  which come after the CCU window.
+
+config MVEBU_MBUS
+	bool "MBUS address decoding driver"
+	depends on !MVEBU_SPL_DDR_OVER_PCI_SUPPORT
+	default n
+	help
+	  Choose this option to add support
+	  for MBUS address decoding driver.
+	  This driver initialize the MBUS windows
+	  only.
+
+config MVEBU_A3700_IO_ADDR_DEC
+	bool "Armada-3700 Address decoding support"
+	depends on !MVEBU_SPL_DDR_OVER_PCI_SUPPORT && TARGET_ARMADA_3700
+	default n
+	help
+	  Choose this option to add support
+	  for Marvell Armada-3700 address decoding driver
+
+endmenu

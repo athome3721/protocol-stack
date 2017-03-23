@@ -1,0 +1,129 @@
+menu "Network drivers"
+
+config MVEBU_MDIO
+	bool "MVEBU mdio driver"
+	default n
+	help
+	  Choose this option to add support
+	  for Marvell MDIO driver which add
+	  SMI/XSMI read/write functions to read
+	  from Marvell PHYs
+
+config ENC28J60
+	bool "ENC28J60 driver"
+	default n
+	help
+	  Choose this option to add support
+	  for eth-spi (enc28j60) which
+	  enable receiving ethernet packets
+	  using spi interface.
+
+config PHYLIB
+	bool "common phy libary"
+	default n
+	help
+	  Choose this option to add support
+	  for common phy libary which
+	  includes some basic PHY util
+	  that are widely used.
+
+config MVNETA
+	bool "marvell neta driver"
+	default n
+	select PHYLIB
+	help
+	  Choose this option to add support
+	  for marvell neta eth driver which
+	  enable RX/TX ethernet packets
+	  using gbe interface on marvell SoC.
+
+config MVEBU_NETA_BYPASS_DEC_WIN
+	bool "bypass decode window of neta driver"
+	depends on MVNETA
+	default n
+	help
+	  Choose this option to bypass decode window configuration
+	  of neta eth driver. For some marvell Soc, there are two
+	  layers of decode window for GBE:
+	  1. GbE Address window that resides inside the GBE unit.
+	  2. Fabric address window which is located in the NIC400.
+	  In this case, to simplify address decode window,
+	  bypass the first layer of GBE decode window by
+	  setting the first window to 4GB.
+
+config PHY_MARVELL
+	bool "marvell PHY driver"
+	default n
+	help
+	  Choose this option to add support
+	  for marvell PHY driver, which enables
+	  PHY layer and initialization support
+	  Supports general initialization for Alaska 88E1510/88E1518/88E1512
+
+config MAX_NETA_PORT_NUM
+	int "max port number in neta driver"
+	depends on MVNETA
+	default 2
+	help
+	  Define the max number of
+	  ethernet ports that need
+	  to be supported in marvell
+	  neta driver.
+
+config MVPP2X
+	bool "marvell pp2x driver"
+	default n
+	select PHYLIB
+	help
+	  Choose this option to add support
+	  for marvell pp2x eth driver which
+	  enable RX/TX ethernet packets
+	  using gbe interface on marvell SoC.
+
+choice
+	prompt "Packet Processor Version"
+	depends on MVPP2X
+	default MVPPV22
+	help
+	  There are 2 versions of marvell pp2x driver.
+	  Different version apply to different SoCs.
+
+	  Please select correct version for SoC.
+
+config MVPPV21
+	bool "PP21"
+	help
+	  Choose this option to add support
+	  for marvell pp21 eth driver
+	  using gbe interface on marvell SoC.
+	  pp21 applies to A375 and Avanta LP.
+
+config MVPPV22
+	bool "PP22"
+	help
+	  Choose this option to add support
+	  for marvell pp22 eth driver
+	  using gbe interface on marvell SoC.
+	  pp22 applies to A70xx and A80xx
+endchoice
+
+config MAX_MVPP2X_NUM
+	int "max packet processor number in mvpp2x driver"
+	depends on MVPP2X
+	default 2
+	help
+	  Define the max number of
+	  packet processor v2 that need
+	  to be supported in marvell
+	  mvpp2x driver.
+
+config MAX_MVPP2X_PORT_NUM
+	int "max number of ports connected to each packet processor v2"
+	depends on MVPP2X
+	default 3
+	help
+	  Define the max number of
+	  ethernet ports that connected
+	  to packet processor v2 in marvell
+	  mvpp2x driver.
+endmenu

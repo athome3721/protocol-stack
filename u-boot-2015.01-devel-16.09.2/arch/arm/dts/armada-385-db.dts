@@ -1,0 +1,239 @@
+
+/dts-v1/;
+
+#include <dt-bindings/comphy/comphy_data.h>
+#define ATTR(remapped, target, attributes) (((remapped) << 12) | ((target) << 8) | (attributes))
+
+/ {
+	model = "DB-88F6820-BP";
+	compatible = "marvell,armada-38x-db", "marvell,armada38x";
+
+	#address-cells = <2>;
+	#size-cells = <1>;
+
+	memory {
+		device_type = "memory";
+		reg = <0 0x00000000 0x10000000>; /* 256 MB */
+	};
+
+	cpus {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		cpu@0 {
+			device_type = "cpu";
+			compatible = "arm,cortex-a9";
+			reg = <0>;
+		};
+		cpu@1 {
+			device_type = "cpu";
+			compatible = "arm,cortex-a9";
+			reg = <1>;
+		};
+	};
+
+	soc {
+		compatible = "marvell,armada380-mbus", "simple-bus";
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		internal-regs {
+			compatible = "marvell,internal-regs";
+			#address-cells = <1>;
+			#size-cells = <1>;
+			ranges = <0x0000 0xf1000000 0x1000000>;
+			ranges-spl = <0x0000 0xd0000000 0x1000000>;
+
+			tclk: tclk {
+				compatible = "marvell,tclk";
+				reg = <0x18600 0x4>;
+			};
+
+			i2c0: i2c@11000 {
+				compatible = "marvell,mvebu-i2c";
+				reg = <0x11000 0x4>;
+				clock = <&tclk>;
+				support-256-offset;
+				status = "okay";
+			};
+
+			i2c1: i2c@11100 {
+				compatible = "marvell,mvebu-i2c";
+				reg = <0x11100 0x4>;
+				clock = <&tclk>;
+				status = "disable";
+			};
+
+			pinctl: pinctl@18000 {
+				compatible = "marvell,mvebu-pinctl";
+				bank-name ="armada-380";
+				reg = <0x18000 0x24>;
+				pin-count = <64>;
+				max-func = <7>;
+			};
+
+			spi0: spi@10600 {
+				compatible = "marvell,orion-spi";
+				reg = <0x10600 0x50>;
+				#address-cells = <1>;
+				#size-cells = <0>;
+				spi-max-frequency = <20971520>;
+				clock = <&tclk>;
+				status = "okay";
+				cpol-cpha-cs-bitmap = <1>; /* bit i is set if the CPOL and CPHA
+							      of CS-i is enabled or not */
+			};
+
+			spi1: spi@10680 {
+				compatible = "marvell,orion-spi";
+				reg = <0x10680 0x50>;
+				#address-cells = <1>;
+				#size-cells = <0>;
+				status = "disabled";
+			};
+
+			thermal: thermal@e4070 {
+				compatible = "marvell,thermal-sensor";
+				reg = <0xE4070 0x12>;
+				status = "okay";
+			};
+
+			ddr-mac {
+				compatible = "marvell,mvebu-ddr-mac";
+				reg = <0x1400 0x20>;
+				status = "okay";
+			};
+
+			ddr-phy {
+				compatible = "marvell,mvebu-ddr-phy";
+				reg = <0x1600 0x10>;
+				status = "okay";
+			};
+
+			comphy {
+				compatible = "marvell,mvebu-comphy", "marvell,comphy-armada38x";
+				mux-bitcount = <4>;
+				max-lanes = <6>;
+				reg-comphy = <0x18300 0x8>;
+				reg-hpipe3 = <0xa0000 0x8>;
+				phy0 {
+					phy-type = <PHY_TYPE_SATA0>;
+					phy-speed = <PHY_SPEED_1_25G>;
+				};
+				phy1 {
+					phy-type = <PHY_TYPE_PEX0>;
+					phy-speed = <PHY_SPEED_5G>;
+				};
+				phy2 {
+					phy-type = <PHY_TYPE_PEX1>;
+					phy-speed = <PHY_SPEED_5G>;
+				};
+			};
+			mbus {
+				compatible = "marvell,mvebu-mbus";
+				reg = <0x20000 0x50>;
+				max-win = <19>;
+				max-remap = <8>;
+				internal-win = <20>;
+				windows = <0xE0000000 0x2000000 ATTR(0x1, 0x8, 0xE8)
+					0xE2000000 0x2000000 ATTR(0x1, 0x4, 0xE8)
+					0xE4000000 0x2000000 ATTR(0x1, 0x4, 0xD8)
+					0xE6000000 0x2000000 ATTR(0x1, 0x4, 0xB8)
+					0xfd000000 0x1000000 ATTR(0x0, 0x1, 0x2F)>;
+			};
+			pcie-controller {
+				#address-cells = <1>;
+				#size-cells = <1>;
+				compatible = "marvell,mvebu-pcie";
+
+				pcie@1,0 {
+					reg = <0x80000 0x2000>;
+					mem = <0xE0000000 0x2000000>;
+					status = "okay";
+				};
+
+				pcie@2,0 {
+					reg = <0x40000 0x2000>;
+					mem = <0xE2000000 0x2000000>;
+					status = "okay";
+				};
+			};
+			nand@D0000 {
+				compatible = "marvell,mvebu-pxa3xx-nand";
+				reg = <0xD0000 0x100>;
+				#address-cells = <1>;
+
+				nand-enable-arbiter;
+				num-cs = <1>;
+				nand-ecc-strength = <4>;
+				nand-ecc-step-size = <512>;
+		        };
+
+		};
+	};
+
+	sar {
+		compatible = "marvell,sample-at-reset";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		reg = <0x40 0x44 0x48>;
+		chip_count = <3>;
+		bit_width = <5>;
+
+		cpufreq {
+			key = "cpufreq";
+			description = "CPU frequency";
+			start-bit = <0>;
+			bit-length = <4>;
+			option-cnt = <2>;
+			options = "0x0", "1800/900",
+				"0x1", "1600/800";
+			default = <0x1>;
+			swap-bit;
+			status = "okay";
+		};
+		bootsrc {
+			key = "bootsrc";
+			description = "Boot source options";
+			start-bit = <4>;
+			bit-length = <4>;
+			option-cnt = <3>;
+			options = "0x0", "NAND",
+				"0x1", "SPI",
+				"0x2", "NOR";
+			default = <0x1>;
+			status = "okay";
+		};
+	};
+
+	/* This should go only into devel boards */
+	mpp-buses {
+		mpp-bus0 {
+			compatible = "marvell,mvebu-mpp-bus";
+			bus-name = "spi0";
+			bank-name = "armada-380";
+			pin-count = <4>;
+			pins = <22 1  23 1  24 1  25 1>;
+		};
+		mpp-bus1 {
+			compatible = "marvell,mvebu-mpp-bus";
+			bus-name = "nand";
+			bank-name = "armada-380";
+			pin-count = <14>;
+			pins = <22 5  23 5  25 5  28 5 30 5
+				32 5  33 5  34 5  35 5 36 5
+				38 5  40 5  41 6  42 5>;
+		};
+	};
+};
+
+&pinctl {
+	          /* 0 1 2 3 4 5 6 7 8 9 */
+	pin-func = < 1 1 1 1 1 1 1 1 1 1
+		     1 1 1 1 1 1 1 1 0 6
+		     6 2 1 1 1 1 0 2 2 2
+		     2 2 2 0 0 0 0 2 2 2
+		     2 2 0 2 4 0 0 4 5 5
+		     5 0 5 5 5 5 0 5 5 5
+		     0 0 0 0>;
+};
+

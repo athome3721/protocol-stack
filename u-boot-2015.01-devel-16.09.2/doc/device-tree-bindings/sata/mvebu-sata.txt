@@ -1,0 +1,19 @@
+Marvell EBU SATA bindings
+=========================
+
+Support for the AHCI based Sata unit in MVEBU SoCs.
+
+Mandatory properties:
+SoC specific:
+	- compatible: Should be "marvell,mvebu-sata".
+	- reg: Base address and size of the SATA unit.
+Board specific:
+	- status
+		SATA port's status. It can be "okay" or "disabled".
+
+Example for SATA-0 node:
+	sata0@e0000 {
+		compatible = "marvell,mvebu-sata";
+		reg = <0xe0000 0x20>;
+		status = "disabled";
+	};

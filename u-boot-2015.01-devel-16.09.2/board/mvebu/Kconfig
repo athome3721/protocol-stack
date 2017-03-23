@@ -1,0 +1,148 @@
+source "arch/arm/cpu/armv8/armada8k/Kconfig"
+source "arch/arm/cpu/armv7/armada38x/Kconfig"
+source "arch/arm/cpu/armv8/armada3700/Kconfig"
+
+config MVEBU
+	bool "Support MVEBU devices"
+	depends on $SYS_VENDOR="mvebu"
+	default y
+
+menu "Marvell Platform Options"
+	depends on MVEBU
+
+menu "Board Options"
+
+config DEVEL_BOARD
+	bool "Support MVEBU development boards"
+	depends on MVEBU
+	default n
+	---help---
+	  Say Y here to add support for Marvell MVEBU
+	  development boards.
+	  You need this only if you work on a Marvell board.
+	  If not, keep this off to reduce code size
+
+source "board/mvebu/common/Kconfig"
+endmenu
+
+menu "Soc Options"
+
+config MVEBU_FLC
+	bool "Enable Final Level Cache (FLC) driver"
+	depends on !MVEBU_SPL_DDR_OVER_PCI_SUPPORT
+	default n
+	help
+	  Choose this option to add support
+	  for Final Level Cache for the Marvell McKinley
+	  Memory Controller driver.
+	  This driver enable FLC and open the FLC windows.
+
+config AP806_Z_SUPPORT
+	bool "Enable support for AP-806-Z1 & Z2"
+	default n
+	help
+	  Choose this option to add support
+	  for Marvell's AP-806-Z1/Z2 devices
+	  This configurations controlls all sorts of fixes
+	  relevant only for the Z1 & Z2 stepping of AP-806
+
+config A3700_Z_SUPPORT
+	bool "Enable support for Armada-3700 Z1"
+	default n
+	help
+	  Choose this option to add support
+	  for Marvell's Armada-3700 Z1 devices.
+	  This configurations controlls all sorts of fixes
+	  relevant only for the Z1 stepping of Armada-3700.
+
+config MVEBU_A3700_CLOCK
+	bool "Armada-3700  clock support"
+	depends on TARGET_ARMADA_3700
+	default n
+	help
+	  Choose this option to support
+	  Marvell Armada-3700 clock driver.
+	  For the first stage all clocks will be enabled
+	  by default.
+
+config MVEBU_A3700_PM
+	bool "Armada-3700 PM support"
+	depends on TARGET_ARMADA_3700
+	select MVEBU_A3700_AVS
+	default n
+	help
+	  Choose this option to support
+	  Marvell Armada-3700 power management.
+	  This configuration set default PM settings
+	  according to current DT and clock configuration.
+
+config MVEBU_A3700_AVS
+	bool "Armada-3700 AVS support"
+	depends on TARGET_ARMADA_3700
+	default n
+	help
+	  Choose this option to support
+	  Marvell Armada-3700 Adaptive Voltage Scaling(AVS).
+	  This configuration set default AVS settings
+	  according to current DT and clock configuration.
+
+config MVEBU_BOOTMODE_SWITCH_SUPPORT
+	bool "Mvebu bootmode switch support"
+	depends on DEVEL_BOARD && TARGET_ARMADA_3700
+	default n
+	help
+	  For armada-3700 Z series DB board, the boot source is
+	  switched to uart at the early stage of ATF, choose this
+	  option to restore the boot source at the last stage before
+	  reaching u-boot prompt. This mechanism is introduced
+	  in order to fallback to uart mode automatically
+	  when a mal-function bootloader image is present in flash.
+
+choice
+	depends on TARGET_ARMADA_3700
+	prompt "CPU and DDR Clock preset"
+	default PRESET_CPU_800_DDR_800
+
+config PRESET_CPU_600_DDR_600
+	bool "CPU at 600 MHz, DDR at 600 MHz"
+	help
+	  Run system with the following clock
+	  tree configuration preset:
+	  CPU at 600 MHz,
+	  DDR3 at 600 MHz
+
+config PRESET_CPU_800_DDR_800
+	bool "CPU at 800 MHz, DDR at 800 MHz"
+	help
+	  Run system with the following clock
+	  tree configuration preset:
+	  CPU at 800 MHz,
+	  DDR3 at 800 MHz
+
+config PRESET_CPU_1000_DDR_800
+	bool "CPU at 1000 MHz, DDR at 800 MHz"
+	help
+	  Run system with the following clock
+	  tree configuration preset:
+	  CPU at 1000 MHz,
+	  DDR3 at 800 MHz
+
+endchoice
+
+endmenu
+
+config PALLADIUM
+	bool "Support palladium emulation"
+	depends on TARGET_ARMADA_3700 || TARGET_ARMADA_8K
+	default n
+	help
+	  Choose this option to enable
+	  Palladium support.
+	  There are certain differences
+	  between palladium and real SoC,
+	  like Clock and PHY, this should
+	  not be enabled for real SoC.
+
+source "arch/arm/cpu/mvebu-common/Kconfig"
+
+endmenu

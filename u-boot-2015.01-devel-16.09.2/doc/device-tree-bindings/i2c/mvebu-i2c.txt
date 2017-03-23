@@ -1,0 +1,25 @@
+Marvell I2C bindings
+====================
+
+The I2C driver provides read / write access to external peripherals
+using the I2C bus.
+
+Mandatory properties:
+SoC specific:
+	- compatible
+		Should be "marvell,mvebu-i2c".
+	- reg
+		Base address and size of I2C-0.
+	- clock
+		This property points to the clock used for the I2C interface.
+		In this example the node points to the t-clock.
+	- status
+		Set to okay/disabled if the I2C interface is enabled/disabled.
+
+Example for I2C-0 node:
+	i2c0: i2c@11000 {
+		compatible = "marvell,mvebu-i2c";
+		reg = <0x11000 0x4>;
+		clock = <&tclk>;
+		status = "okay";
+	};

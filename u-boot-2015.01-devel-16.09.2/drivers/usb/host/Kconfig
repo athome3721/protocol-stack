@@ -1,0 +1,98 @@
+#
+# USB Host Controller Drivers
+#
+comment "USB Host Controller Drivers"
+
+config USB_XHCI_HCD
+	bool "xHCI HCD (USB 3.0) support"
+	---help---
+	  The eXtensible Host Controller Interface (xHCI) is standard for USB 3.0
+	  "SuperSpeed" host controller hardware.
+
+config USB_XHCI
+	bool
+	default USB_XHCI_HCD
+	---help---
+	  TODO: rename after most boards switch to Kconfig
+
+config USB_XHCI_MVEBU
+	bool "mvebu USB 3.0 support"
+	default y
+	depends on MVEBU && USB_XHCI_HCD
+	---help---
+	  Choose this option to add support
+	  for USB 3.0 driver on mvebu SoCs,
+	  which includes Armada8K, Armada3700
+	  and other Armada family SoCs.
+
+if USB_XHCI_HCD
+
+endif
+
+config USB_EHCI_HCD
+	bool "EHCI HCD (USB 2.0) support"
+	---help---
+	  The Enhanced Host Controller Interface (EHCI) is standard for USB 2.0
+	  "high speed" (480 Mbit/sec, 60 Mbyte/sec) host controller hardware.
+	  If your USB host controller supports USB 2.0, you will likely want to
+	  configure this Host Controller Driver.
+
+	  EHCI controllers are packaged with "companion" host controllers (OHCI
+	  or UHCI) to handle USB 1.1 devices connected to root hub ports.  Ports
+	  will connect to EHCI if the device is high speed, otherwise they
+	  connect to a companion controller.  If you configure EHCI, you should
+	  probably configure the OHCI (for NEC and some other vendors) USB Host
+	  Controller Driver or UHCI (for Via motherboards) Host Controller
+	  Driver too.
+
+	  You may want to read <file:Documentation/usb/ehci.txt>.
+
+config USB_EHCI
+	bool
+	default USB_EHCI_HCD
+	---help---
+	  TODO: rename after most boards switch to Kconfig
+
+if USB_EHCI_HCD
+
+config USB_EHCI_MARVELL
+	bool "MARVELL USB 2.0 support"
+	default y
+	depends on MVEBU
+	---help---
+	  Choose this option to add support
+	  for USB 2.0 driver on mvebu SoCs,
+	  which includes Armada3700 and
+	  other Armada family SoCs.
+
+config USB_EHCI_MARVELL_BYPASS_BRG_ADDR_DEC
+	bool "Bypass MARVELL USB 2.0 bridge address decode setting"
+	default n
+	depends on USB_EHCI_MARVELL
+	---help---
+	  Choose this option to bypass configuration
+	  for USB 2.0 bridge address decode
+	  setting on certain mvebu SoCs.
+	  Address decode configuration is needed for
+	  Armada-XP, Armada-37x, Armada-38x and Armada-390
+	  SoCs, while not needed by Armada-3700.
+
+config USB_EHCI_MARVELL_SBUSCFG
+	bool "MARVELL USB 2.0 sbuscfg setting"
+	default n
+	depends on USB_EHCI_MARVELL
+	---help---
+	  Choose this option to add support
+	  for USB 2.0 sbuscfg setting on
+	  certain mvebu SoCs, which includes
+	  Armada-37xx SoCs.
+
+config USB_EHCI_UNIPHIER
+	bool "Support for Panasonic UniPhier on-chip EHCI USB controller"
+	depends on ARCH_UNIPHIER
+	default y
+	---help---
+	  Enables support for the on-chip EHCI controller on Panasonic
+	  UniPhier SoCs.
+
+endif
